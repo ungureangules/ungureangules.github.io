@@ -19,8 +19,6 @@ jobs:
 
       - name: Install, build, and upload with Astro
         uses: withastro/action@v3
-        with:
-          path: ./site # Specify the path to the Astro project
 
   deploy:
     needs: build
