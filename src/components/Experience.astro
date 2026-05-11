@@ -1,0 +1,64 @@
+---
+const experiences = [
+	{
+		title: "Software Developer",
+		company: "Federal Prosecutor’s Office (MPF)",
+		period: "2023 – Present",
+		description: "Leading the modernization of legacy web applications, transitioning systems to Java backends and React frontends. Exploring internal workflow efficiencies via local AI models (LLaMA, Whisper).",
+		tags: ["React", "Java", "AI Integration", "RESTful APIs"]
+	},
+	{
+		title: "System Administrator",
+		company: "Federal Prosecutor’s Office (MPF)",
+		period: "2015 – 2023",
+		description: "Managed end-to-end ICT solutions for critical government operations. Automated repetitive tasks using PowerShell and Python, reducing manual errors and overhead.",
+		tags: ["Python", "PowerShell", "Linux", "Windows Server", "Virtualization"]
+	},
+	{
+		title: "Master of IT (Extension)",
+		company: "Kaplan Business School (KBS)",
+		period: "Expected 2026",
+		description: "Specializing in Programming & AI Application. Focusing on how to bridge theoretical AI with commercial operational efficiency.",
+		tags: ["Australia", "AI Research", "Advanced Programming"]
+	}
+];
+---
+<section id="experience" class="py-24 bg-zinc-950/50">
+	<div class="container mx-auto px-6">
+		<h2 class="text-3xl font-bold text-white mb-12 flex items-center gap-4">
+			<span class="w-8 h-px bg-orange-500"></span>
+			Experience Timeline
+		</h2>
+		
+		<div class="relative space-y-12 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-zinc-800 before:to-transparent">
+			{experiences.map((exp) => (
+				<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+					{/* Icon */}
+					<div class="flex items-center justify-center w-10 h-10 rounded-full border border-zinc-800 bg-zinc-950 text-orange-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+						<svg class="fill-current" viewBox="0 0 12 12" width="12" height="12">
+							<path d="M12 10v2H7V8.499a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V10ZM5 12H0V8.499a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V12ZM12 5V7H7V3.499a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V5ZM5 7H0V3.499a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V7Z" />
+						</svg>
+					</div>
+					{/* Content */}
+					<div class="w-[calc(100%-4rem)] md:w-[45%] p-6 rounded-xl border border-zinc-900 bg-zinc-900/50 hover:bg-zinc-900 transition-colors">
+						<div class="flex items-center justify-between space-x-2 mb-2">
+							<h3 class="font-bold text-white">{exp.title}</h3>
+							<time class="font-mono text-xs text-orange-500">{exp.period}</time>
+						</div>
+						<div class="text-sm font-medium text-zinc-400 mb-3">{exp.company}</div>
+						<p class="text-zinc-500 text-sm mb-4 leading-relaxed">
+							{exp.description}
+						</p>
+						<div class="flex flex-wrap gap-2">
+							{exp.tags.map(tag => (
+								<span class="px-2 py-1 rounded text-[10px] font-medium bg-zinc-800 text-zinc-400 border border-zinc-700">
+									{tag}
+								</span>
+							))}
+						</div>
+					</div>
+				</div>
+			))}
+		</div>
+	</div>
+</section>
