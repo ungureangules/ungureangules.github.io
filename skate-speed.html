@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skate Speed</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #222;
+    --accent: #c8f135;
+    --muted: #555;
+    --text: #eee;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    gap: 0;
+  }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* ── Big dial ── */
+  .dial-wrap {
+    position: relative;
+    width: min(320px, 85vw);
+    aspect-ratio: 1;
+    margin: 0 auto 8px;
+  }
+
+  .dial-svg { width: 100%; height: 100%; transform: rotate(-135deg); }
+
+  .track { fill: none; stroke: var(--border); stroke-width: 14; stroke-linecap: round; }
+  .fill  { fill: none; stroke: var(--accent); stroke-width: 14; stroke-linecap: round;
+           stroke-dasharray: 0 283; transition: stroke-dasharray 0.35s ease; filter: drop-shadow(0 0 8px #c8f13588); }
+
+  .speed-readout {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .speed-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 22vw, 100px);
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    transition: color 0.3s;
+  }
+
+  .speed-unit {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── Stats row ── */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: min(320px, 85vw);
+    margin: 16px auto 24px;
+  }
+
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--text); line-height: 1; }
+  .stat-unit  { font-size: 10px; color: var(--muted); }
+
+  /* ── Buttons ── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    width: min(320px, 85vw);
+    margin: 0 auto;
+  }
+
+  button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  button:active { transform: scale(0.97); }
+
+  #btn-start {
+    background: var(--accent);
+    color: #0a0a0a;
+  }
+  #btn-start:disabled { opacity: 0.35; cursor: default; }
+
+  #btn-reset {
+    background: var(--surface);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Status bar ── */
+  .status {
+    margin-top: 20px;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 0.05em;
+    min-height: 16px;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    margin-right: 6px;
+    vertical-align: middle;
+    transition: background 0.3s;
+  }
+  .dot.live { background: var(--accent); animation: pulse 1.2s infinite; }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+  }
+
+  /* unit toggle */
+  .unit-toggle {
+    display: flex;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    width: min(320px, 85vw);
+    margin: 0 auto 20px;
+  }
+  .unit-toggle button {
+    flex: 1;
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    padding: 10px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    transition: background 0.2s, color 0.2s;
+  }
+  .unit-toggle button.active {
+    background: var(--border);
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<p class="eyebrow">Skate Speed</p>
+
+<div class="dial-wrap">
+  <svg class="dial-svg" viewBox="0 0 100 100">
+    <!-- 270° arc: start at top-left, sweep clockwise -->
+    <circle class="track" cx="50" cy="50" r="45"
+      stroke-dasharray="212.1 70.7"
+      stroke-dashoffset="0"/>
+    <circle class="fill" id="arc" cx="50" cy="50" r="45"
+      stroke-dasharray="0 283"
+      stroke-dashoffset="0"/>
+  </svg>
+  <div class="speed-readout">
+    <span class="speed-num" id="spd">0</span>
+    <span class="speed-unit" id="unit-label">km/h</span>
+  </div>
+</div>
+
+<div class="unit-toggle">
+  <button class="active" id="u-kmh" onclick="setUnit('kmh')">KM/H</button>
+  <button id="u-mph" onclick="setUnit('mph')">MPH</button>
+</div>
+
+<div class="stats">
+  <div class="stat-box">
+    <span class="stat-label">Top Speed</span>
+    <span class="stat-value" id="max-spd">0</span>
+    <span class="stat-unit" id="max-unit">km/h</span>
+  </div>
+  <div class="stat-box">
+    <span class="stat-label">Avg Speed</span>
+    <span class="stat-value" id="avg-spd">0</span>
+    <span class="stat-unit" id="avg-unit">km/h</span>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="btn-start" onclick="toggleTracking()">Start</button>
+  <button id="btn-reset" onclick="resetStats()">Reset</button>
+</div>
+
+<p class="status"><span class="dot" id="dot"></span><span id="status-text">Tap Start to begin</span></p>
+
+<script>
+  let watchId = null;
+  let tracking = false;
+  let unit = 'kmh';
+  let maxSpeed = 0;
+  let speedReadings = [];
+
+  const MAX_DIAL = 60; // km/h for full arc
+
+  function setUnit(u) {
+    unit = u;
+    document.getElementById('u-kmh').classList.toggle('active', u === 'kmh');
+    document.getElementById('u-mph').classList.toggle('active', u === 'mph');
+    const label = u === 'kmh' ? 'km/h' : 'mph';
+    document.getElementById('unit-label').textContent = label;
+    document.getElementById('max-unit').textContent = label;
+    document.getElementById('avg-unit').textContent = label;
+    updateDisplay();
+  }
+
+  function toDisplay(kmh) {
+    return unit === 'kmh' ? kmh : kmh * 0.621371;
+  }
+
+  function updateDisplay() {
+    const cur = speedReadings.length ? speedReadings[speedReadings.length - 1] : 0;
+    const avg = speedReadings.length ? speedReadings.reduce((a,b)=>a+b,0)/speedReadings.length : 0;
+
+    document.getElementById('spd').textContent = Math.round(toDisplay(cur));
+    document.getElementById('max-spd').textContent = Math.round(toDisplay(maxSpeed));
+    document.getElementById('avg-spd').textContent = Math.round(toDisplay(avg));
+
+    // Arc: 270° = 212.1 units of circumference on r=45 circle (2π×45×0.75 ≈ 212.1)
+    const pct = Math.min(cur / MAX_DIAL, 1);
+    const arcLen = pct * 212.1;
+    document.getElementById('arc').setAttribute('stroke-dasharray', `${arcLen} 283`);
+
+    // Color shift near max
+    const spd = document.getElementById('spd');
+    if (pct > 0.85) spd.style.color = '#ff6b35';
+    else spd.style.color = 'var(--accent)';
+  }
+
+  function toggleTracking() {
+    if (!tracking) startTracking();
+    else stopTracking();
+  }
+
+  function startTracking() {
+    if (!navigator.geolocation) {
+      setStatus('GPS not available on this device');
+      return;
+    }
+    document.getElementById('btn-start').textContent = 'Stop';
+    document.getElementById('btn-start').style.background = '#333';
+    document.getElementById('btn-start').style.color = '#eee';
+    document.getElementById('dot').classList.add('live');
+    setStatus('Acquiring GPS signal…');
+    tracking = true;
+
+    watchId = navigator.geolocation.watchPosition(
+      pos => {
+        const kmh = (pos.coords.speed || 0) * 3.6;
+        if (kmh < 0) return;
+        speedReadings.push(kmh);
+        if (kmh > maxSpeed) maxSpeed = kmh;
+        setStatus('GPS active · accuracy ±' + Math.round(pos.coords.accuracy) + 'm');
+        updateDisplay();
+      },
+      err => {
+        let msg = 'GPS error';
+        if (err.code === 1) msg = 'Location permission denied';
+        if (err.code === 2) msg = 'GPS unavailable';
+        if (err.code === 3) msg = 'GPS timed out';
+        setStatus(msg);
+        stopTracking();
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+    );
+  }
+
+  function stopTracking() {
+    tracking = false;
+    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    document.getElementById('btn-start').textContent = 'Start';
+    document.getElementById('btn-start').style.background = 'var(--accent)';
+    document.getElementById('btn-start').style.color = '#0a0a0a';
+    document.getElementById('dot').classList.remove('live');
+    setStatus('Session paused');
+    // Freeze current speed at 0
+    speedReadings.push(0);
+    updateDisplay();
+  }
+
+  function resetStats() {
+    speedReadings = [];
+    maxSpeed = 0;
+    updateDisplay();
+    setStatus(tracking ? 'Stats reset · still tracking' : 'Tap Start to begin');
+  }
+
+  function setStatus(msg) {
+    document.getElementById('status-text').textContent = msg;
+  }
+</script>
+</body>
+</html>
