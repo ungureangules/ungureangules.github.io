@@ -22,10 +22,88 @@ const { title } = Astro.props;
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 	</head>
 	<body class="min-h-screen font-sans antialiased">
+		<!-- Intro overlay -->
+		<div id="intro" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950">
+			<span id="intro-text" class="font-mono text-5xl md:text-7xl font-bold tracking-widest text-red-500"></span>
+			<span id="intro-cursor" class="font-mono text-5xl md:text-7xl font-bold text-red-500 animate-pulse">|</span>
+		</div>
+
 		<div class="fixed inset-0 -z-10 h-full w-full bg-zinc-950">
 			<div class="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#27272a_1px,transparent_1px),linear-gradient(to_bottom,#27272a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 		</div>
-		<slot />
+		<div id="main-content" style="opacity:0">
+			<slot />
+		</div>
+
+		<script>
+			const el = document.getElementById('intro-text')!;
+			const intro = document.getElementById('intro')!;
+			const main = document.getElementById('main-content')!;
+
+			// "SERIAL KILL" typed, then backspace "KILL", then type "FIXER"
+			const phase1 = 'SERIAL KILL';
+			const phase2 = 'FIXER';
+			const deleteCount = 4; // delete "KILL"
+
+			let i = 0;
+			function typePhase1() {
+				if (i < phase1.length) {
+					el.textContent += phase1[i++];
+					setTimeout(typePhase1, i < 7 ? 120 : 80);
+				} else {
+					setTimeout(deletePhase, 500);
+				}
+			}
+
+			let d = 0;
+			function deletePhase() {
+				if (d < deleteCount) {
+					el.textContent = el.textContent!.slice(0, -1);
+					d++;
+					setTimeout(deletePhase, 80);
+				} else {
+					setTimeout(typePhase2, 200);
+				}
+			}
+
+			let j = 0;
+			function typePhase2() {
+				if (j < phase2.length) {
+					el.textContent += phase2[j++];
+					setTimeout(typePhase2, 100);
+				} else {
+					setTimeout(fadeOut, 800);
+				}
+			}
+
+			function fadeOut() {
+				intro.style.transition = 'opacity 0.8s ease';
+				intro.style.opacity = '0';
+				main.style.transition = 'opacity 0.8s ease 0.4s';
+				main.style.opacity = '1';
+				setTimeout(() => intro.style.display = 'none', 900);
+			}
+
+			typePhase1();
+
+			// Scroll-triggered fade-in for sections
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach(e => {
+					if (e.isIntersecting) {
+						(e.target as HTMLElement).style.opacity = '1';
+						(e.target as HTMLElement).style.transform = 'translateY(0)';
+						observer.unobserve(e.target);
+					}
+				});
+			}, { threshold: 0.1 });
+
+			document.querySelectorAll('section').forEach(s => {
+				s.style.opacity = '0';
+				s.style.transform = 'translateY(40px)';
+				s.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+				observer.observe(s);
+			});
+		</script>
 	</body>
 </html>
 
