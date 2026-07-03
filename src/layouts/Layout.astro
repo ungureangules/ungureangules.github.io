@@ -9,7 +9,7 @@ const { title } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" class="bg-zinc-950 text-zinc-300 selection:bg-orange-500/30">
+<html lang="en" class="bg-zinc-950 text-zinc-300 selection:bg-[#1793d1]/30">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="description" content="Italo Gules - Serial Fixer & AI Automation Specialist" />
@@ -19,17 +19,21 @@ const { title } = Astro.props;
 		<title>{title}</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Creepster&display=swap" rel="stylesheet">
 	</head>
 	<body class="min-h-screen font-sans antialiased">
 		<!-- Intro overlay -->
-		<div id="intro" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950">
-			<span id="intro-text" class="font-mono text-5xl md:text-7xl font-bold tracking-widest text-red-500"></span>
-			<span id="intro-cursor" class="font-mono text-5xl md:text-7xl font-bold text-red-500 animate-pulse">|</span>
+		<div id="intro" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950 overflow-hidden">
+			<div class="relative flex items-center">
+				<span id="intro-text" style="font-family:'Creepster',cursive;font-size:clamp(3rem,10vw,7rem);color:#dc2626;letter-spacing:0.1em;"></span>
+				<span id="intro-fixer" style="font-family:'Creepster',cursive;font-size:clamp(3rem,10vw,7rem);color:#1793d1;letter-spacing:0.1em;"></span>
+				<span id="intro-cursor" style="font-family:'Creepster',cursive;font-size:clamp(3rem,10vw,7rem);color:#dc2626;animation:blink 0.7s step-end infinite;">|</span>
+				<div id="drips"></div>
+			</div>
 		</div>
 
 		<div class="fixed inset-0 -z-10 h-full w-full bg-zinc-950">
-			<div class="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#27272a_1px,transparent_1px),linear-gradient(to_bottom,#27272a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+			<canvas id="bg-canvas" class="absolute inset-0 w-full h-full opacity-20"></canvas>
 		</div>
 		<div id="main-content" style="opacity:0">
 			<slot />
@@ -37,18 +41,39 @@ const { title } = Astro.props;
 
 		<script>
 			const el = document.getElementById('intro-text')!;
+			const elFixer = document.getElementById('intro-fixer')!;
 			const intro = document.getElementById('intro')!;
 			const main = document.getElementById('main-content')!;
+			const dripsContainer = document.getElementById('drips')!;
 
-			// "SERIAL KILL" typed, then backspace "KILL", then type "FIXER"
 			const phase1 = 'SERIAL KILL';
 			const phase2 = 'FIXER';
-			const deleteCount = 4; // delete "KILL"
+			const deleteCount = 4;
+
+			function spawnDrip() {
+				const textRect = el.getBoundingClientRect();
+				const containerRect = el.parentElement!.getBoundingClientRect();
+				const x = (textRect.right - containerRect.left) + (Math.random() * 10 - 5);
+				const height = 20 + Math.random() * 60;
+				const width = 3 + Math.random() * 5;
+
+				const drip = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+				drip.style.cssText = `position:absolute;top:70%;left:${x}px;overflow:visible;pointer-events:none;`;
+				drip.innerHTML = `
+					<rect x="0" y="0" width="${width}" height="0" fill="#dc2626" rx="${width/2}">
+						<animate attributeName="height" from="0" to="${height}" dur="${0.4 + Math.random()*0.5}s" fill="freeze" />
+					</rect>
+					<circle cx="${width/2}" cy="${height}" r="${width/2 + 1}" fill="#dc2626">
+						<animate attributeName="cy" from="0" to="${height}" dur="${0.4 + Math.random()*0.5}s" fill="freeze" />
+					</circle>`;
+				dripsContainer.appendChild(drip);
+			}
 
 			let i = 0;
 			function typePhase1() {
 				if (i < phase1.length) {
 					el.textContent += phase1[i++];
+					if (phase1[i-1] !== ' ') spawnDrip();
 					setTimeout(typePhase1, i < 7 ? 120 : 80);
 				} else {
 					setTimeout(deletePhase, 500);
@@ -68,8 +93,9 @@ const { title } = Astro.props;
 
 			let j = 0;
 			function typePhase2() {
+				if (j === 0) dripsContainer.innerHTML = '';
 				if (j < phase2.length) {
-					el.textContent += phase2[j++];
+					elFixer.textContent += phase2[j++];
 					setTimeout(typePhase2, 100);
 				} else {
 					setTimeout(fadeOut, 800);
@@ -85,6 +111,74 @@ const { title } = Astro.props;
 			}
 
 			typePhase1();
+
+			// Background canvas: floating Python snippets + Arch logos
+			const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
+			const ctx = canvas.getContext('2d')!;
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+			const ARCH_BLUE = '#1793d1';
+			const snippets = [
+				'def automate(task):',
+				'  return task.run()',
+				'import subprocess',
+				'agent.invoke(prompt)',
+				'for proc in processes:',
+				'  if proc.boring:',
+				'    automate(proc)',
+				'llm = Hermes()',
+				'os.system(cmd)',
+				'async def fix():',
+				'claude.run_agent()',
+				'subprocess.Popen()',
+				'@dataclass',
+				'yield result',
+			];
+
+			type Particle = { x: number; y: number; speed: number; text: string; size: number; alpha: number; isArch: boolean; };
+			const particles: Particle[] = Array.from({ length: 28 }, () => ({
+				x: Math.random() * canvas.width,
+				y: Math.random() * canvas.height,
+				speed: 0.2 + Math.random() * 0.4,
+				text: snippets[Math.floor(Math.random() * snippets.length)],
+				size: 11 + Math.random() * 6,
+				alpha: 0.15 + Math.random() * 0.35,
+				isArch: Math.random() < 0.15,
+			}));
+
+			function drawArch(x: number, y: number, size: number, alpha: number) {
+				ctx.save();
+				ctx.globalAlpha = alpha;
+				ctx.fillStyle = ARCH_BLUE;
+				// Arch logo is ~182x183 in its natural coords, scale to `size`
+				const scale = size / 182;
+				ctx.translate(x, y);
+				ctx.scale(scale, scale);
+				const p = new Path2D('M 105.8125 16.625 c -7.39687 18.135158 -11.858304 29.997682 -20.09375 47.59375 5.04936 5.35232 11.247211 11.585364 21.3125 18.625 C 96.210077 78.390904 88.828713 73.920352 83.3125 69.28125 72.7727 91.274163 56.259864 122.60209 22.75 182.8125 c 26.337628 -15.205170 46.754089 -24.579320 65.78125 -28.15625 -0.817034 -3.514100 -1.281534 -7.315230 -1.25 -11.28125 l 0.03125 -0.84375 c 0.417917 -16.87382 9.195665 -29.84979 19.59375 -28.96875 10.39809 0.88104 18.48041 15.28242 18.0625 32.15625 -0.0786 3.17512 -0.43674 6.22955 -1.0625 9.0625 18.82058 3.68164 39.01873 13.03179 65 28.03125 -5.123 -9.4318 -9.69572 -17.93388 -14.0625 -26.03125 -6.87839 -5.33121 -14.05289 -12.2698 -28.6875 -19.78125 10.05899 2.61375 17.2611 5.62932 22.875 9 C 124.63297 63.338161 121.03766 52.354109 105.8125 16.625 z');
+				ctx.fill(p);
+				ctx.restore();
+			}
+
+			function animate() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				for (const p of particles) {
+					p.y -= p.speed;
+					if (p.y < -40) { p.y = canvas.height + 20; p.x = Math.random() * canvas.width; }
+					if (p.isArch) {
+						drawArch(p.x, p.y, p.size * 2.5, p.alpha);
+					} else {
+						ctx.globalAlpha = p.alpha;
+						ctx.fillStyle = ARCH_BLUE;
+						ctx.font = `${p.size}px 'JetBrains Mono', monospace`;
+						ctx.fillText(p.text, p.x, p.y);
+					}
+				}
+				ctx.globalAlpha = 1;
+				requestAnimationFrame(animate);
+			}
+			animate();
 
 			// Scroll-triggered fade-in for sections
 			const observer = new IntersectionObserver((entries) => {
@@ -108,6 +202,9 @@ const { title } = Astro.props;
 </html>
 
 <style is:global>
+	@keyframes blink {
+		50% { opacity: 0; }
+	}
 	:root {
 		--font-sans: 'Inter', system-ui, sans-serif;
 		--font-mono: 'JetBrains Mono', monospace;

@@ -17,20 +17,20 @@ const skillGroups = [
 <section id="skills" class="py-24">
 	<div class="container mx-auto px-6">
 		<h2 class="text-3xl font-bold text-white mb-12 flex items-center gap-4">
-			<span class="w-8 h-px bg-orange-500"></span>
+			<span class="w-8 h-px bg-[#1793d1]"></span>
 			Core Capabilities
 		</h2>
 		
 		<div class="grid md:grid-cols-3 gap-8">
 			{skillGroups.map(group => (
-				<div class="p-8 rounded-2xl border border-zinc-900 bg-zinc-900/30 hover:border-zinc-800 transition-all group">
-					<h3 class="text-xl font-bold text-white mb-6 group-hover:text-orange-500 transition-colors">
+				<div class="p-8 rounded-2xl border border-zinc-900 bg-zinc-900/30 hover:border-[#1793d1]/40 transition-all group">
+					<h3 class="text-xl font-bold text-white mb-6 group-hover:text-[#1793d1] transition-colors">
 						{group.title}
 					</h3>
 					<ul class="space-y-3">
 						{group.skills.map(skill => (
 							<li class="flex items-center gap-3 text-zinc-400">
-								<span class="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-orange-500 transition-colors"></span>
+								<span class="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-[#1793d1] transition-colors"></span>
 								{skill}
 							</li>
 						))}
