@@ -12,106 +12,22 @@ const { title } = Astro.props;
 <html lang="en" class="bg-zinc-950 text-zinc-300 selection:bg-[#1793d1]/30">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Italo Gules - Serial Fixer & AI Automation Specialist" />
+		<meta name="description" content="Italo Gules - AI Automation Specialist" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Creepster&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 	</head>
 	<body class="min-h-screen font-sans antialiased">
-		<!-- Intro overlay -->
-		<div id="intro" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950 overflow-hidden">
-			<div class="relative flex items-center">
-				<span id="intro-text" style="font-family:'Creepster',cursive;font-size:clamp(3rem,10vw,7rem);color:#dc2626;letter-spacing:0.1em;"></span>
-				<span id="intro-fixer" style="font-family:'Inter',sans-serif;font-size:clamp(3rem,10vw,7rem);color:#1793d1;letter-spacing:0.1em;font-weight:700;"></span>
-				<span id="intro-cursor" style="font-family:'Creepster',cursive;font-size:clamp(3rem,10vw,7rem);color:#dc2626;animation:blink 0.7s step-end infinite;">|</span>
-				<div id="drips"></div>
-			</div>
-		</div>
-
 		<div class="fixed inset-0 -z-10 h-full w-full bg-zinc-950">
 			<canvas id="bg-canvas" class="absolute inset-0 w-full h-full opacity-20"></canvas>
 		</div>
-		<div id="main-content" style="opacity:0">
-			<slot />
-		</div>
+		<slot />
 
 		<script>
-			const el = document.getElementById('intro-text')!;
-			const elFixer = document.getElementById('intro-fixer')!;
-			const intro = document.getElementById('intro')!;
-			const main = document.getElementById('main-content')!;
-			const dripsContainer = document.getElementById('drips')!;
-
-			const phase1 = 'SERIAL KILL';
-			const phase2 = 'FIXER';
-			const deleteCount = 4;
-
-			function spawnDrip() {
-				const textRect = el.getBoundingClientRect();
-				const containerRect = el.parentElement!.getBoundingClientRect();
-				const x = (textRect.right - containerRect.left) + (Math.random() * 10 - 5);
-				const height = 20 + Math.random() * 60;
-				const width = 3 + Math.random() * 5;
-
-				const drip = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-				drip.style.cssText = `position:absolute;top:70%;left:${x}px;overflow:visible;pointer-events:none;`;
-				drip.innerHTML = `
-					<rect x="0" y="0" width="${width}" height="0" fill="#dc2626" rx="${width/2}">
-						<animate attributeName="height" from="0" to="${height}" dur="${0.4 + Math.random()*0.5}s" fill="freeze" />
-					</rect>
-					<circle cx="${width/2}" cy="${height}" r="${width/2 + 1}" fill="#dc2626">
-						<animate attributeName="cy" from="0" to="${height}" dur="${0.4 + Math.random()*0.5}s" fill="freeze" />
-					</circle>`;
-				dripsContainer.appendChild(drip);
-			}
-
-			let i = 0;
-			function typePhase1() {
-				if (i < phase1.length) {
-					el.textContent += phase1[i++];
-					if (phase1[i-1] !== ' ') spawnDrip();
-					setTimeout(typePhase1, i < 7 ? 120 : 80);
-				} else {
-					setTimeout(deletePhase, 500);
-				}
-			}
-
-			let d = 0;
-			function deletePhase() {
-				if (d < deleteCount) {
-					el.textContent = el.textContent!.slice(0, -1);
-					d++;
-					setTimeout(deletePhase, 80);
-				} else {
-					setTimeout(typePhase2, 200);
-				}
-			}
-
-			let j = 0;
-			function typePhase2() {
-				if (j === 0) dripsContainer.innerHTML = '';
-				if (j < phase2.length) {
-					elFixer.textContent += phase2[j++];
-					setTimeout(typePhase2, 100);
-				} else {
-					setTimeout(fadeOut, 800);
-				}
-			}
-
-			function fadeOut() {
-				intro.style.transition = 'opacity 0.8s ease';
-				intro.style.opacity = '0';
-				main.style.transition = 'opacity 0.8s ease 0.4s';
-				main.style.opacity = '1';
-				setTimeout(() => intro.style.display = 'none', 900);
-			}
-
-			typePhase1();
-
 			// Background canvas: floating Python snippets + Arch logos
 			const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
 			const ctx = canvas.getContext('2d')!;
@@ -152,7 +68,6 @@ const { title } = Astro.props;
 				ctx.save();
 				ctx.globalAlpha = alpha;
 				ctx.fillStyle = ARCH_BLUE;
-				// Arch logo is ~182x183 in its natural coords, scale to `size`
 				const scale = size / 182;
 				ctx.translate(x, y);
 				ctx.scale(scale, scale);
@@ -202,9 +117,6 @@ const { title } = Astro.props;
 </html>
 
 <style is:global>
-	@keyframes blink {
-		50% { opacity: 0; }
-	}
 	:root {
 		--font-sans: 'Inter', system-ui, sans-serif;
 		--font-mono: 'JetBrains Mono', monospace;
