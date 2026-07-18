@@ -33,9 +33,18 @@ const qrDataUrl = await QRCode.toDataURL('https://italogules.dev/card', {
 						</div>
 						<span class="text-xs text-zinc-500 group-hover:text-[#1793d1] transition-colors font-mono uppercase tracking-widest">Scan or tap for contact card</span>
 					</a>
-					<div class="flex justify-center gap-6">
+					<div class="flex justify-center gap-6 items-center flex-wrap">
 						<a href="https://www.linkedin.com/in/italogules/" target="_blank" class="text-zinc-400 hover:text-[#1793d1] transition-colors">LinkedIn</a>
+						<span class="text-zinc-800" aria-hidden="true">|</span>
 						<a href="mailto:italogules@gmail.com" class="text-zinc-400 hover:text-[#1793d1] transition-colors">Email</a>
+						<span class="text-zinc-800" aria-hidden="true">|</span>
+						<a href="/speedometer.html" class="text-zinc-400 hover:text-[#c8f135] transition-colors flex items-center gap-1.5 font-mono">
+							<svg class="w-4 h-4 text-[#c8f135]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+								<path d="m12 14 4-4" />
+								<path d="M3.34 19a10 10 0 1 1 17.32 0" />
+							</svg>
+							<span>Speedometer</span>
+						</a>
 					</div>
 				</div>
 				<div class="mt-12 text-zinc-600 text-sm font-mono">
@@ -43,5 +52,22 @@ const qrDataUrl = await QRCode.toDataURL('https://italogules.dev/card', {
 				</div>
 			</div>
 		</footer>
+
+		<!-- Floating Speedometer Button -->
+		<a
+			href="/speedometer.html"
+			class="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full border border-zinc-800 bg-zinc-950/90 hover:bg-[#c8f135]/10 hover:border-[#c8f135]/40 text-zinc-300 hover:text-white shadow-xl backdrop-blur-md transition-all duration-300 group font-mono text-xs"
+			aria-label="Speedometer"
+		>
+			<span class="relative flex h-2 w-2">
+				<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c8f135] opacity-75"></span>
+				<span class="relative inline-flex rounded-full h-2 w-2 bg-[#c8f135]"></span>
+			</span>
+			<svg class="w-4 h-4 text-[#c8f135] transition-transform duration-300 group-hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+				<path d="m12 14 4-4" />
+				<path d="M3.34 19a10 10 0 1 1 17.32 0" />
+			</svg>
+			<span>Speedometer</span>
+		</a>
 	</main>
 </Layout>
