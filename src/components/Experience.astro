@@ -1,64 +1,165 @@
 ---
-const experiences = [
+import SectionHeading from './SectionHeading.astro';
+
+type Entry = {
+	hash: string;
+	ref?: string;
+	kind: 'work' | 'edu';
+	title: string;
+	org: string;
+	period: string;
+	body: string[];
+	tags: string[];
+};
+
+const entries: Entry[] = [
 	{
-		title: "Software Developer",
-		company: "Federal Prosecutor's Office (MPF)",
-		period: "2023 – Present",
-		description: "Leading the modernization of legacy web applications, transitioning systems to Java backends and React frontends. Exploring internal workflow efficiencies via local AI models (LLaMA, Whisper).",
-		tags: ["React", "Java", "AI Integration", "RESTful APIs"]
+		hash: 'a1f9c02',
+		ref: 'HEAD → master-of-it',
+		kind: 'edu',
+		title: 'Master of Information Technology (Extension)',
+		org: 'Kaplan Business School · Gold Coast, AU',
+		period: 'expected 2026',
+		body: [
+			'Specialising in Programming & AI Application.',
+			'Bridging theoretical AI with commercial operational efficiency.',
+		],
+		tags: ['Australia', 'AI application', 'Advanced programming'],
 	},
 	{
-		title: "System Administrator",
-		company: "Federal Prosecutor's Office (MPF)",
-		period: "2015 – 2023",
-		description: "Managed end-to-end ICT solutions for critical government operations. Automated repetitive tasks using PowerShell and Python, reducing manual errors and overhead.",
-		tags: ["Python", "PowerShell", "Linux", "Windows Server", "Virtualization"]
+		hash: '7d3e5b1',
+		ref: 'origin/current-role',
+		kind: 'work',
+		title: 'Software Developer',
+		org: "Federal Prosecutor's Office (MPF) · Brazil",
+		period: '2023 — present',
+		body: [
+			'Leading the modernisation of a legacy web application onto a Java backend and React frontend.',
+			'Designed RESTful APIs that cut cross-service coupling and improved modularity.',
+			'Deployed local AI models (LLaMA, Whisper) to test internal workflow efficiencies.',
+			'Ran release management and Git workflow for a collaborative codebase.',
+		],
+		tags: ['Java', 'React', 'REST', 'LLaMA', 'Whisper', 'Git'],
 	},
 	{
-		title: "Master of IT (Extension)",
-		company: "Kaplan Business School (KBS)",
-		period: "Expected 2026",
-		description: "Specializing in Programming & AI Application. Focusing on how to bridge theoretical AI with commercial operational efficiency.",
-		tags: ["Australia", "AI Research", "Advanced Programming"]
-	}
+		hash: '2c84af6',
+		kind: 'work',
+		title: 'System Administrator',
+		org: "Federal Prosecutor's Office (MPF) · Brazil",
+		period: '2015 — 2023',
+		body: [
+			'Planned and ran end-to-end ICT solutions for critical government operations, holding high service uptime.',
+			'Automated repetitive admin work in PowerShell and Python, cutting manual error and overhead.',
+			'Trained and supported non-technical units, translating systems into language they could act on.',
+		],
+		tags: ['Python', 'PowerShell', 'Windows Server', 'Linux', 'Hyper-V'],
+	},
+	{
+		hash: 'b05d7e9',
+		kind: 'edu',
+		title: 'Technologist in Public Management',
+		org: 'University of Southern Santa Catarina (Unisul)',
+		period: '2015',
+		body: ['Public administration, process and governance — the "why" behind the systems.'],
+		tags: ['Governance', 'Process design'],
+	},
+	{
+		hash: 'f42a1d8',
+		kind: 'edu',
+		title: "Bachelor's Degree in Computer Science",
+		org: 'University of Brasília (UnB)',
+		period: '2010',
+		body: ['Where the habit of automating the boring parts started.'],
+		tags: ['Computer science'],
+	},
 ];
 ---
-<section id="experience" class="py-24 bg-zinc-950/50">
-	<div class="container mx-auto px-6">
-		<h2 class="text-3xl font-bold text-white mb-12 flex items-center gap-4">
-			<span class="w-8 h-px bg-[#1793d1]"></span>
-			Experience Timeline
-		</h2>
-		
-		<div class="relative space-y-12 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-zinc-800 before:to-transparent">
-			{experiences.map((exp) => (
-				<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-					{/* Icon */}
-					<div class="flex items-center justify-center w-10 h-10 rounded-full border border-zinc-800 bg-zinc-950 text-[#1793d1] shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-						<svg class="fill-current" viewBox="0 0 12 12" width="12" height="12">
-							<path d="M12 10v2H7V8.499a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V10ZM5 12H0V8.499a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V12ZM12 5V7H7V3.499a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V5ZM5 7H0V3.499a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V7Z" />
-						</svg>
-					</div>
-					{/* Content */}
-					<div class="w-[calc(100%-4rem)] md:w-[45%] p-6 rounded-xl border border-zinc-900 bg-zinc-900/50 hover:bg-zinc-900 transition-colors">
-						<div class="flex items-center justify-between space-x-2 mb-2">
-							<h3 class="font-bold text-white">{exp.title}</h3>
-							<time class="font-mono text-xs text-[#1793d1]">{exp.period}</time>
-						</div>
-						<div class="text-sm font-medium text-zinc-400 mb-3">{exp.company}</div>
-						<p class="text-zinc-500 text-sm mb-4 leading-relaxed">
-							{exp.description}
-						</p>
-						<div class="flex flex-wrap gap-2">
-							{exp.tags.map(tag => (
-								<span class="px-2 py-1 rounded text-[10px] font-medium bg-zinc-800 text-zinc-400 border border-zinc-700">
-									{tag}
-								</span>
-							))}
-						</div>
-					</div>
+
+<section id="work" class="relative px-5 py-20 md:px-8 md:py-24">
+	<div class="mx-auto max-w-6xl">
+		<SectionHeading index="03" title="experience" command="git log --graph --all" />
+
+		<div class="reveal relative" style="--i:0">
+			<!-- rail -->
+			<div class="rail left-[1.125rem] md:left-[1.125rem]"></div>
+
+			<ol class="space-y-6">
+				{
+					entries.map((e, i) => (
+						<li class="group relative flex gap-5 md:gap-7" style={`--i:${i}`}>
+							{/* commit node */}
+							<div class="node mt-1">
+								{e.kind === 'work' ? (
+									<svg
+										class="h-3.5 w-3.5"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+									>
+										<rect x="3" y="7" width="18" height="13" rx="1" />
+										<path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+									</svg>
+								) : (
+									<svg
+										class="h-3.5 w-3.5"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+									>
+										<path d="M12 4 2 9l10 5 10-5-10-5Z" />
+										<path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5" />
+									</svg>
+								)}
+							</div>
+
+							{/* commit body */}
+							<article class="term sheen min-w-0 flex-1 p-5 md:p-6">
+								<div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.6875rem]">
+									<span class="text-lime">commit {e.hash}</span>
+									{e.ref && (
+										<span class="border border-arch/40 bg-arch/10 px-1.5 py-0.5 text-arch-2">
+											{e.ref}
+										</span>
+									)}
+									<span class="ml-auto text-dim">{e.period}</span>
+								</div>
+
+								<h3 class="text-base font-bold text-white transition-colors duration-300 group-hover:text-arch-2 md:text-lg">
+									{e.title}
+								</h3>
+								<p class="mt-1 text-xs text-dim">{e.org}</p>
+
+								<ul class="mt-4 space-y-2">
+									{e.body.map((line) => (
+										<li class="flex gap-2.5 font-sans text-sm leading-relaxed text-dim">
+											<span class="mt-[0.45rem] h-1 w-1 shrink-0 bg-line-2 transition-colors duration-300 group-hover:bg-arch" />
+											<span>{line}</span>
+										</li>
+									))}
+								</ul>
+
+								<div class="mt-5 flex flex-wrap gap-1.5">
+									{e.tags.map((t) => (
+										<span class="tag">{t}</span>
+									))}
+								</div>
+							</article>
+						</li>
+					))
+				}
+			</ol>
+
+			<!-- end of history -->
+			<div class="relative mt-6 flex items-center gap-5 md:gap-7">
+				<div class="grid h-9 w-9 shrink-0 place-items-center border border-line bg-ink text-line-2">
+					<span class="text-xs">◇</span>
 				</div>
-			))}
+				<p class="text-xs text-line-2">(initial commit — 2010)</p>
+			</div>
 		</div>
 	</div>
 </section>

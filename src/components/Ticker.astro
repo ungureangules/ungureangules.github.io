@@ -1,0 +1,25 @@
+---
+interface Props {
+	items: string[];
+}
+
+const { items } = Astro.props;
+// duplicated once so the -50% keyframe loops seamlessly
+const loop = [...items, ...items];
+---
+
+<div
+	class="marquee select-none border-y border-line bg-ink-2/60 py-3.5 text-xs uppercase tracking-[0.2em] text-line-2"
+	aria-hidden="true"
+>
+	<div class="marquee-track">
+		{
+			loop.map((item, i) => (
+				<span class="flex items-center gap-10 whitespace-nowrap">
+					<span class="transition-colors duration-300 hover:text-arch-2">{item}</span>
+					<span class={i % 3 === 0 ? 'text-arch' : 'text-line-2'}>◆</span>
+				</span>
+			))
+		}
+	</div>
+</div>

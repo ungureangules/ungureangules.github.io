@@ -1,42 +1,105 @@
 ---
-const skillGroups = [
+import SectionHeading from './SectionHeading.astro';
+
+const groups = [
 	{
-		title: "AI & Emerging Tech",
-		skills: ["Hermes Agent", "Claude Agents", "Agent Orchestration", "Whisper AI (STT)", "FLUX.1 Image Gen", "AI-driven Automation"]
+		pkg: 'ai-emerging.pkg',
+		title: 'AI & Emerging Tech',
+		accent: 'lime',
+		items: [
+			'LLM integration — LLaMA, Claude API',
+			'AI agents & orchestration',
+			'Hermes Agent',
+			'Whisper AI (speech-to-text)',
+			'FLUX.1 image generation',
+			'AI-driven automation',
+		],
 	},
 	{
-		title: "Software Development",
-		skills: ["Python", "React", "Java", "SQL", "RESTful APIs", "Git", "Unit Testing"]
+		pkg: 'software-dev.pkg',
+		title: 'Software Development',
+		items: ['Python', 'Java', 'React', 'SQL', 'RESTful APIs', 'Git', 'Unit testing'],
 	},
 	{
-		title: "Infrastructure & Strategy",
-		skills: ["Linux (Arch / all other distros)", "Windows Server (AD/GPO)", "PowerShell/Bash Scripting", "Virtualization", "Workflow Optimization"]
-	}
+		pkg: 'infrastructure.pkg',
+		title: 'Infrastructure',
+		items: [
+			'Linux — Arch, Ubuntu',
+			'Windows Server (AD, GPO)',
+			'PowerShell & Bash scripting',
+			'Virtualization (Hyper-V)',
+			'Service uptime & monitoring',
+		],
+	},
+	{
+		pkg: 'strategy.pkg',
+		title: 'Strategy & People',
+		items: [
+			'Stakeholder communication',
+			'Workflow optimization',
+			'Technical documentation',
+			'Training non-technical teams',
+			'Project leadership',
+		],
+	},
 ];
 ---
-<section id="skills" class="py-24">
-	<div class="container mx-auto px-6">
-		<h2 class="text-3xl font-bold text-white mb-12 flex items-center gap-4">
-			<span class="w-8 h-px bg-[#1793d1]"></span>
-			Core Capabilities
-		</h2>
-		
-		<div class="grid md:grid-cols-3 gap-8">
-			{skillGroups.map(group => (
-				<div class="p-8 rounded-2xl border border-zinc-900 bg-zinc-900/30 hover:border-[#1793d1]/40 transition-all group">
-					<h3 class="text-xl font-bold text-white mb-6 group-hover:text-[#1793d1] transition-colors">
-						{group.title}
-					</h3>
-					<ul class="space-y-3">
-						{group.skills.map(skill => (
-							<li class="flex items-center gap-3 text-zinc-400">
-								<span class="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-[#1793d1] transition-colors"></span>
-								{skill}
-							</li>
-						))}
-					</ul>
-				</div>
-			))}
+
+<section id="stack" class="relative px-5 py-20 md:px-8 md:py-24">
+	<div class="mx-auto max-w-6xl">
+		<SectionHeading index="02" title="core capabilities" command="pacman -Qe --explicit" />
+
+		<div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+			{
+				groups.map((g, gi) => (
+					<div class="reveal" style={`--i:${gi}`}>
+						<div class="term group h-full">
+							<div class="term-bar">
+								<span class="term-dots">
+									<i />
+									<i />
+									<i />
+								</span>
+								<span class="ml-1 truncate">{g.pkg}</span>
+							</div>
+
+							<div class="p-5">
+								<h3
+									class={`text-sm font-bold uppercase tracking-wider transition-colors duration-300 ${
+										g.accent === 'lime'
+											? 'text-lime'
+											: 'text-white group-hover:text-arch-2'
+									}`}
+								>
+									{g.title}
+								</h3>
+
+								<div class="meter my-4" style="--w:100%">
+									<span />
+								</div>
+
+								<ul class="space-y-2.5 text-xs">
+									{g.items.map((item, i) => (
+										<li
+											class="flex gap-2 text-dim transition-colors duration-300 hover:text-fg"
+											style={`--i:${i}`}
+										>
+											<span class="select-none text-line-2 transition-colors duration-300 group-hover:text-arch">
+												{i === g.items.length - 1 ? '└─' : '├─'}
+											</span>
+											<span class="leading-relaxed">{item}</span>
+										</li>
+									))}
+								</ul>
+
+								<p class="mt-5 border-t border-line pt-3 text-[0.625rem] text-line-2">
+									{g.items.length} packages · installed
+								</p>
+							</div>
+						</div>
+					</div>
+				))
+			}
 		</div>
 	</div>
 </section>

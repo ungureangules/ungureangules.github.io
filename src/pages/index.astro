@@ -2,72 +2,90 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import About from '../components/About.astro';
-import Experience from '../components/Experience.astro';
 import Skills from '../components/Skills.astro';
+import Experience from '../components/Experience.astro';
+import Contact from '../components/Contact.astro';
+import Ticker from '../components/Ticker.astro';
 import QRCode from 'qrcode';
 
 const qrDataUrl = await QRCode.toDataURL('https://italogules.dev/card', {
-	width: 120,
-	margin: 2,
-	color: { dark: '#1793d1', light: '#09090b' }
+	width: 280,
+	margin: 1,
+	color: { dark: '#56b6e8', light: '#07080a' },
 });
+
+const tickerItems = [
+	'Python',
+	'Java',
+	'React',
+	'SQL',
+	'Claude API',
+	'LLaMA',
+	'Whisper',
+	'FLUX.1',
+	'AI agents',
+	'PowerShell',
+	'Bash',
+	'Arch Linux',
+	'Windows Server',
+	'Hyper-V',
+	'REST APIs',
+	'Git',
+];
+
+const year = new Date().getFullYear();
 ---
 
-<Layout title="Italo Gules | AI Automation Specialist">
+<Layout title="Italo Gules — AI Automation Specialist" nav>
 	<main>
 		<Hero />
+		<Ticker items={tickerItems} />
 		<About />
 		<Skills />
 		<Experience />
-		
-		<footer id="contact" class="py-12 border-t border-zinc-900">
-			<div class="container mx-auto px-6 text-center">
-				<h2 class="text-2xl font-bold text-white mb-6">Let's build the future together</h2>
-				<p class="text-zinc-400 mb-8 max-w-md mx-auto">
-					I'm always looking for interesting problems to solve and processes to automate.
-				</p>
-				<div class="flex flex-col items-center gap-6">
-					<a href="/card" class="group flex flex-col items-center gap-2">
-						<div class="rounded-xl overflow-hidden border border-zinc-800 group-hover:border-[#1793d1]/50 p-2 bg-zinc-950 transition-colors">
-							<img src={qrDataUrl} alt="Scan to open contact card" class="w-24 h-24" />
-						</div>
-						<span class="text-xs text-zinc-500 group-hover:text-[#1793d1] transition-colors font-mono uppercase tracking-widest">Scan or tap for contact card</span>
-					</a>
-					<div class="flex justify-center gap-6 items-center flex-wrap">
-						<a href="https://www.linkedin.com/in/italogules/" target="_blank" class="text-zinc-400 hover:text-[#1793d1] transition-colors">LinkedIn</a>
-						<span class="text-zinc-800" aria-hidden="true">|</span>
-						<a href="mailto:italogules@gmail.com" class="text-zinc-400 hover:text-[#1793d1] transition-colors">Email</a>
-						<span class="text-zinc-800" aria-hidden="true">|</span>
-						<a href="/speedometer.html" class="text-zinc-400 hover:text-[#c8f135] transition-colors flex items-center gap-1.5 font-mono">
-							<svg class="w-4 h-4 text-[#c8f135]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-								<path d="m12 14 4-4" />
-								<path d="M3.34 19a10 10 0 1 1 17.32 0" />
-							</svg>
-							<span>Speedometer</span>
-						</a>
+		<Contact qrDataUrl={qrDataUrl} />
+
+		<footer class="border-t border-line px-5 py-10 md:px-8">
+			<div class="mx-auto max-w-6xl">
+				<div class="hr-dashed mb-8"></div>
+				<div class="flex flex-col gap-6 text-[0.6875rem] text-line-2 sm:flex-row sm:items-center sm:justify-between">
+					<p>&copy; {year} Italo Gules — all processes automated where possible.</p>
+					<div class="flex flex-wrap items-center gap-4">
+						<a href="/card" class="link">contact card</a>
+						<a
+							href="https://www.linkedin.com/in/italogules/"
+							target="_blank"
+							rel="noopener"
+							class="link">linkedin</a
+						>
+						<a href="/speedometer.html" class="link">speedometer</a>
+						<span class="hidden text-line sm:inline">|</span>
+						<span>astro · tailwind · arch btw</span>
 					</div>
-				</div>
-				<div class="mt-12 text-zinc-600 text-sm font-mono">
-					&copy; {new Date().getFullYear()} Italo Gules. Built with Astro & Tailwind.
 				</div>
 			</div>
 		</footer>
 
-		<!-- Floating Speedometer Button -->
+		<!-- floating speedometer easter egg -->
 		<a
 			href="/speedometer.html"
-			class="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full border border-zinc-800 bg-zinc-950/90 hover:bg-[#c8f135]/10 hover:border-[#c8f135]/40 text-zinc-300 hover:text-white shadow-xl backdrop-blur-md transition-all duration-300 group font-mono text-xs"
-			aria-label="Speedometer"
+			class="group fixed bottom-5 right-5 z-40 flex items-center gap-2.5 border border-line-2 bg-ink/90 px-3.5 py-2.5 text-[0.6875rem] text-dim backdrop-blur-md transition-all duration-300 hover:border-lime/50 hover:text-lime"
+			aria-label="Open the speedometer"
 		>
-			<span class="relative flex h-2 w-2">
-				<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c8f135] opacity-75"></span>
-				<span class="relative inline-flex rounded-full h-2 w-2 bg-[#c8f135]"></span>
-			</span>
-			<svg class="w-4 h-4 text-[#c8f135] transition-transform duration-300 group-hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+			<span class="dot-live"></span>
+			<svg
+				class="h-3.5 w-3.5 text-lime transition-transform duration-500 group-hover:rotate-[18deg]"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<path d="m12 14 4-4" />
 				<path d="M3.34 19a10 10 0 1 1 17.32 0" />
 			</svg>
-			<span>Speedometer</span>
+			<span class="hidden sm:inline">speedometer</span>
 		</a>
 	</main>
 </Layout>

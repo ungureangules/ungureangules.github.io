@@ -1,36 +1,72 @@
 ---
+import SectionHeading from './SectionHeading.astro';
+
+const quote =
+	'Everything that is boring and repetitive should be automated. What is fun and repetitive should not.';
+const words = quote.split(' ');
+
+const traits = [
+	{
+		flag: '--fix-broken-things',
+		title: 'Driven by challenges',
+		body: 'I go looking for the systems everyone else gave up on. Broken pipelines, undocumented legacy, "we just do it manually" processes — that is the fun part. Especially when someone already failed at it.',
+	},
+	{
+		flag: '--bridge-legacy-ai',
+		title: 'Translator, not just a coder',
+		body: 'Thirteen years sitting between infrastructure, developers and the people who actually use the thing. I speak all three, so AI stops being a demo and starts being a workflow that survives Monday morning.',
+	},
+	{
+		flag: '--no-mindless-repetition',
+		title: 'Allergic to busywork',
+		body: 'If a human does it twice the same way, it should be a script, a service or an agent. I would rather spend a day building the automation than a year performing the task.',
+	},
+];
 ---
-<section id="about" class="py-24 bg-[#1793d1]/5">
-	<div class="container mx-auto px-6">
-		<div class="max-w-3xl mx-auto text-center">
-			<h2 class="text-3xl font-bold text-white mb-8">The Philosophy</h2>
-			<p class="text-xl text-zinc-400 mb-10 leading-relaxed italic">
-				"Everything that is boring and repetitive should be automated, what is fun and repetitive should not."
+
+<section id="about" class="relative px-5 py-20 md:px-8 md:py-24">
+	<div class="mx-auto max-w-6xl">
+		<SectionHeading index="01" title="philosophy" command="cat ~/.philosophy" />
+
+		<!-- ── pull quote, revealed word by word ─────────────── -->
+		<blockquote class="mb-16 max-w-4xl md:mb-20">
+			<p
+				class="text-balance font-sans text-2xl leading-snug tracking-tight text-white sm:text-3xl md:text-[2.6rem] md:leading-[1.15]"
+			>
+				{
+					words.map((w, i) => (
+						<span class="reveal inline-block" style={`--i:${(i * 0.45).toFixed(2)}`}>
+							{w}&nbsp;
+						</span>
+					))
+				}
 			</p>
-			<div class="grid md:grid-cols-2 gap-8 text-left">
-				<div class="p-6 rounded-xl border border-zinc-900 bg-zinc-900/50">
-					<h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
-						<svg class="w-5 h-5 text-[#1793d1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-						</svg>
-						Driven by Challenges
-					</h3>
-					<p class="text-zinc-500">
-						I love to fix broken things and automate boring processes. I thrive on challenges—especially the ones where others have failed—and I have a natural disdain for mindless repetition.
-					</p>
-				</div>
-				<div class="p-6 rounded-xl border border-zinc-900 bg-zinc-900/50">
-					<h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
-						<svg class="w-5 h-5 text-[#1793d1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-						</svg>
-						Bridge Builder
-					</h3>
-					<p class="text-zinc-500">
-						With 11 years of experience, I excel at bridging the gap between complex technical systems and business strategy. I don't just write code; I design systems that improve operational efficiency.
-					</p>
-				</div>
-			</div>
+			<footer class="reveal mt-6 flex items-center gap-3 text-xs text-dim" style="--i:2">
+				<span class="h-px w-8 bg-arch"></span>
+				operating principle #1
+			</footer>
+		</blockquote>
+
+		<!-- ── traits as --help output ───────────────────────── -->
+		<div class="grid gap-px border border-line bg-line md:grid-cols-3">
+			{
+				traits.map((t, i) => (
+					<article
+						class="reveal sheen group relative bg-ink p-6 transition-colors duration-500 hover:bg-surface md:p-8"
+						style={`--i:${i}`}
+					>
+						<span class="absolute right-5 top-5 text-[0.625rem] text-line-2 transition-colors duration-300 group-hover:text-arch">
+							0{i + 1}
+						</span>
+						<code class="text-[0.6875rem] text-lime">{t.flag}</code>
+						<h3 class="mt-3 text-lg font-bold text-white transition-colors duration-300 group-hover:text-arch-2">
+							{t.title}
+						</h3>
+						<p class="mt-3 font-sans text-sm leading-relaxed text-dim">{t.body}</p>
+						<span class="mt-6 block h-px w-0 bg-arch transition-all duration-500 group-hover:w-full"></span>
+					</article>
+				))
+			}
 		</div>
 	</div>
 </section>

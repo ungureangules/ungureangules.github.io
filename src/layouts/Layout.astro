@@ -3,134 +3,374 @@ import '../styles/global.css';
 
 interface Props {
 	title: string;
+	description?: string;
+	/** 'full' = CRT grid + code rain (home). 'quiet' = calm backdrop (cards). */
+	backdrop?: 'full' | 'quiet';
+	nav?: boolean;
 }
 
-const { title } = Astro.props;
+const {
+	title,
+	description = 'Italo Gules — AI Automation Specialist. 13 years of IT, bridging legacy infrastructure and modern AI.',
+	backdrop = 'full',
+	nav = false,
+} = Astro.props;
+
+const navLinks = [
+	{ href: '#about', label: './philosophy' },
+	{ href: '#stack', label: './stack' },
+	{ href: '#work', label: './work' },
+	{ href: '#contact', label: './contact' },
+];
 ---
 
 <!doctype html>
-<html lang="en" class="bg-zinc-950 text-zinc-300 selection:bg-[#1793d1]/30">
+<html lang="en" class="bg-ink text-fg">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Italo Gules - AI Automation Specialist" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={description} />
+		<meta name="theme-color" content="#07080a" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<noscript>
+			<style>
+				.reveal,
+				.boot-line { opacity: 1 !important; }
+			</style>
+		</noscript>
 	</head>
-	<body class="min-h-screen font-sans antialiased">
-		<div class="fixed inset-0 -z-10 h-full w-full bg-zinc-950">
-			<canvas id="bg-canvas" class="absolute inset-0 w-full h-full opacity-20"></canvas>
+	<body class="min-h-screen antialiased overflow-x-hidden">
+		<!-- ── backdrop ─────────────────────────────────────────── -->
+		<div class="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+			<div class="absolute inset-0 bg-ink"></div>
+			{backdrop === 'full' && <div class="bg-grid"></div>}
+			{backdrop === 'full' && <canvas id="rain" class="absolute inset-0 h-full w-full opacity-[0.11]"></canvas>}
+			<div class="bg-spotlight" id="spotlight"></div>
+			{backdrop === 'full' && <div class="bg-sweep"></div>}
+			<div class="bg-vignette"></div>
+			<div class="bg-scanlines"></div>
+			<div class="bg-grain"></div>
 		</div>
+
+		<div class="scroll-progress" id="progress" aria-hidden="true"></div>
+
+		{
+			nav && (
+				<header
+					id="nav"
+					class="fixed top-0 inset-x-0 z-50 border-b border-line/60 bg-ink/70 backdrop-blur-md transition-all duration-500"
+				>
+					<div class="mx-auto max-w-6xl px-5 md:px-8">
+						<div class="flex h-14 items-center justify-between gap-4 text-xs">
+							<a href="#top" class="group shrink-0 whitespace-nowrap">
+								<span class="text-arch">italo</span><span class="text-dim">@</span><span
+									class="text-fg transition-colors group-hover:text-arch-2">arch</span
+								><span class="text-dim">:~</span><span class="text-lime">$</span>
+							</a>
+
+							<nav class="hidden md:flex items-center gap-6">
+								{navLinks.map((l) => (
+									<a
+										href={l.href}
+										data-scramble
+										class="text-dim hover:text-arch-2 transition-colors duration-300"
+									>
+										{l.label}
+									</a>
+								))}
+							</nav>
+
+							<div class="flex shrink-0 items-center gap-3">
+								<span class="tnum hidden text-dim sm:inline" id="clock">--:--:--</span>
+								<span class="hidden text-line-2 sm:inline">|</span>
+								<span class="flex items-center gap-2 whitespace-nowrap text-dim">
+									<span class="dot-live"></span>
+									<span>open to work</span>
+								</span>
+								<button
+									id="menu-btn"
+									class="ml-1 border border-line-2 px-2 py-1 text-dim transition-colors hover:border-arch/50 hover:text-arch-2 md:hidden"
+									aria-label="Toggle navigation"
+									aria-expanded="false"
+									aria-controls="menu"
+								>
+									<span id="menu-icon">≡</span>
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<div
+						id="menu"
+						class="hidden border-t border-line bg-ink/95 backdrop-blur-md md:hidden"
+					>
+						<div class="px-5 py-3">
+							{navLinks.map((l) => (
+								<a
+									href={l.href}
+									class="flex items-center gap-2 border-b border-line/60 py-3 text-xs text-dim last:border-0 active:text-arch-2"
+								>
+									<span class="text-arch">$</span>
+									<span>cd {l.label}</span>
+									<span class="ml-auto text-line-2">→</span>
+								</a>
+							))}
+						</div>
+					</div>
+				</header>
+			)
+		}
+
 		<slot />
 
 		<script>
-			// Background canvas: floating Python snippets + Arch logos
-			const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
-			const ctx = canvas.getContext('2d')!;
-			canvas.width = window.innerWidth;
-			canvas.height = window.innerHeight;
-			window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+			const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-			const ARCH_BLUE = '#1793d1';
-			const snippets = [
-				'def automate(task):',
-				'  return task.run()',
-				'import subprocess',
-				'agent.invoke(prompt)',
-				'for proc in processes:',
-				'  if proc.boring:',
-				'    automate(proc)',
-				'llm = Hermes()',
-				'os.system(cmd)',
-				'async def fix():',
-				'claude.run_agent()',
-				'subprocess.Popen()',
-				'@dataclass',
-				'yield result',
-			];
+			/* ── scroll progress ─────────────────────────────────── */
+			const progress = document.getElementById('progress');
+			const onScroll = () => {
+				const h = document.documentElement.scrollHeight - window.innerHeight;
+				const p = h > 0 ? window.scrollY / h : 0;
+				progress?.style.setProperty('--p', String(p));
+				document
+					.getElementById('nav')
+					?.classList.toggle('is-stuck', window.scrollY > 24);
+			};
+			addEventListener('scroll', onScroll, { passive: true });
+			onScroll();
 
-			type Particle = { x: number; y: number; speed: number; text: string; size: number; alpha: number; isArch: boolean; };
-			const particles: Particle[] = Array.from({ length: 28 }, () => ({
-				x: Math.random() * canvas.width,
-				y: Math.random() * canvas.height,
-				speed: 0.2 + Math.random() * 0.4,
-				text: snippets[Math.floor(Math.random() * snippets.length)],
-				size: 11 + Math.random() * 6,
-				alpha: 0.15 + Math.random() * 0.35,
-				isArch: Math.random() < 0.15,
-			}));
-
-			function drawArch(x: number, y: number, size: number, alpha: number) {
-				ctx.save();
-				ctx.globalAlpha = alpha;
-				ctx.fillStyle = ARCH_BLUE;
-				const scale = size / 182;
-				ctx.translate(x, y);
-				ctx.scale(scale, scale);
-				const p = new Path2D('M 105.8125 16.625 c -7.39687 18.135158 -11.858304 29.997682 -20.09375 47.59375 5.04936 5.35232 11.247211 11.585364 21.3125 18.625 C 96.210077 78.390904 88.828713 73.920352 83.3125 69.28125 72.7727 91.274163 56.259864 122.60209 22.75 182.8125 c 26.337628 -15.205170 46.754089 -24.579320 65.78125 -28.15625 -0.817034 -3.514100 -1.281534 -7.315230 -1.25 -11.28125 l 0.03125 -0.84375 c 0.417917 -16.87382 9.195665 -29.84979 19.59375 -28.96875 10.39809 0.88104 18.48041 15.28242 18.0625 32.15625 -0.0786 3.17512 -0.43674 6.22955 -1.0625 9.0625 18.82058 3.68164 39.01873 13.03179 65 28.03125 -5.123 -9.4318 -9.69572 -17.93388 -14.0625 -26.03125 -6.87839 -5.33121 -14.05289 -12.2698 -28.6875 -19.78125 10.05899 2.61375 17.2611 5.62932 22.875 9 C 124.63297 63.338161 121.03766 52.354109 105.8125 16.625 z');
-				ctx.fill(p);
-				ctx.restore();
+			/* ── cursor spotlight ────────────────────────────────── */
+			const spot = document.getElementById('spotlight');
+			if (spot && matchMedia('(pointer: fine)').matches) {
+				let raf = 0;
+				addEventListener(
+					'pointermove',
+					(e) => {
+						if (raf) return;
+						raf = requestAnimationFrame(() => {
+							raf = 0;
+							spot.style.setProperty('--mx', `${e.clientX}px`);
+							spot.style.setProperty('--my', `${e.clientY}px`);
+						});
+					},
+					{ passive: true }
+				);
 			}
 
-			function animate() {
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				for (const p of particles) {
-					p.y -= p.speed;
-					if (p.y < -40) { p.y = canvas.height + 20; p.x = Math.random() * canvas.width; }
-					if (p.isArch) {
-						drawArch(p.x, p.y, p.size * 2.5, p.alpha);
-					} else {
-						ctx.globalAlpha = p.alpha;
-						ctx.fillStyle = ARCH_BLUE;
-						ctx.font = `${p.size}px 'JetBrains Mono', monospace`;
-						ctx.fillText(p.text, p.x, p.y);
+			/* ── reveal on scroll ────────────────────────────────── */
+			const io = new IntersectionObserver(
+				(entries) => {
+					for (const e of entries) {
+						if (!e.isIntersecting) continue;
+						e.target.classList.add('is-in');
+						io.unobserve(e.target);
 					}
-				}
-				ctx.globalAlpha = 1;
-				requestAnimationFrame(animate);
-			}
-			animate();
+				},
+				{ threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+			);
+			document.querySelectorAll('.reveal, [data-stagger]').forEach((el) => io.observe(el));
 
-			// Scroll-triggered fade-in for sections
-			const observer = new IntersectionObserver((entries) => {
-				entries.forEach(e => {
-					if (e.isIntersecting) {
-						(e.target as HTMLElement).style.opacity = '1';
-						(e.target as HTMLElement).style.transform = 'translateY(0)';
-						observer.unobserve(e.target);
-					}
+			/* ── mobile menu ─────────────────────────────────────── */
+			const menuBtn = document.getElementById('menu-btn');
+			const menu = document.getElementById('menu');
+			const menuIcon = document.getElementById('menu-icon');
+			const setMenu = (open: boolean) => {
+				menu?.classList.toggle('hidden', !open);
+				menuBtn?.setAttribute('aria-expanded', String(open));
+				if (menuIcon) menuIcon.textContent = open ? '×' : '≡';
+			};
+			menuBtn?.addEventListener('click', () =>
+				setMenu(menuBtn.getAttribute('aria-expanded') !== 'true')
+			);
+			menu?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+
+			/* ── scrollspy: mark the section you're reading ───────── */
+			const navAnchors = Array.from(
+				document.querySelectorAll<HTMLAnchorElement>('#nav a[href^="#"]')
+			).filter((a) => a.hash.length > 1);
+			if (navAnchors.length) {
+				const byId = new Map(navAnchors.map((a) => [a.hash.slice(1), a]));
+				const spy = new IntersectionObserver(
+					(entries) => {
+						for (const e of entries) {
+							if (!e.isIntersecting) continue;
+							navAnchors.forEach((a) => a.removeAttribute('data-active'));
+							byId.get(e.target.id)?.setAttribute('data-active', '');
+						}
+					},
+					{ rootMargin: '-45% 0px -50% 0px' }
+				);
+				byId.forEach((_, id) => {
+					const section = document.getElementById(id);
+					if (section) spy.observe(section);
 				});
-			}, { threshold: 0.1 });
+			}
 
-			document.querySelectorAll('section').forEach(s => {
-				s.style.opacity = '0';
-				s.style.transform = 'translateY(40px)';
-				s.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
-				observer.observe(s);
+			/* ── local clock (AEST, no DST on the Gold Coast) ─────── */
+			const clock = document.getElementById('clock');
+			if (clock) {
+				const fmt = new Intl.DateTimeFormat('en-AU', {
+					timeZone: 'Australia/Brisbane',
+					hour: '2-digit',
+					minute: '2-digit',
+					second: '2-digit',
+					hour12: false,
+				});
+				const tick = () => (clock.textContent = `${fmt.format(new Date())} AEST`);
+				tick();
+				setInterval(tick, 1000);
+			}
+
+			/* ── nav link text scramble ──────────────────────────── */
+			const GLYPHS = '!<>-_\\/[]{}—=+*^?#________';
+			document.querySelectorAll<HTMLElement>('[data-scramble]').forEach((el) => {
+				const original = el.textContent ?? '';
+				let timer: number | undefined;
+				el.addEventListener('pointerenter', () => {
+					if (reduced) return;
+					let frame = 0;
+					clearInterval(timer);
+					timer = window.setInterval(() => {
+						frame++;
+						el.textContent = original
+							.split('')
+							.map((c, i) =>
+								i < frame / 2 || c === '.' || c === '/'
+									? c
+									: GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
+							)
+							.join('');
+						if (frame / 2 >= original.length) {
+							clearInterval(timer);
+							el.textContent = original;
+						}
+					}, 28);
+				});
+				el.addEventListener('pointerleave', () => {
+					clearInterval(timer);
+					el.textContent = original;
+				});
 			});
+
+			/* ── background code rain ────────────────────────────── */
+			const canvas = document.getElementById('rain') as HTMLCanvasElement | null;
+			if (canvas && !reduced) {
+				const ctx = canvas.getContext('2d')!;
+				const ARCH = '#1793d1';
+				const TOKENS = [
+					'def', 'async', 'await', 'yield', 'subprocess', 'agent', 'invoke',
+					'pacman -Syu', 'systemctl', 'automate()', 'llm', 'claude', 'whisper',
+					'0x1F', '01001', 'venv', 'grep -r', 'chmod +x', 'git rebase', 'ssh',
+					'0.0.1', 'while True:', 'return', 'ok', 'pass', 'ETL', 'cron',
+				];
+				const ARCH_PATH = new Path2D(
+					'M 105.8125 16.625 c -7.39687 18.135158 -11.858304 29.997682 -20.09375 47.59375 5.04936 5.35232 11.247211 11.585364 21.3125 18.625 C 96.210077 78.390904 88.828713 73.920352 83.3125 69.28125 72.7727 91.274163 56.259864 122.60209 22.75 182.8125 c 26.337628 -15.205170 46.754089 -24.579320 65.78125 -28.15625 -0.817034 -3.514100 -1.281534 -7.315230 -1.25 -11.28125 l 0.03125 -0.84375 c 0.417917 -16.87382 9.195665 -29.84979 19.59375 -28.96875 10.39809 0.88104 18.48041 15.28242 18.0625 32.15625 -0.0786 3.17512 -0.43674 6.22955 -1.0625 9.0625 18.82058 3.68164 39.01873 13.03179 65 28.03125 -5.123 -9.4318 -9.69572 -17.93388 -14.0625 -26.03125 -6.87839 -5.33121 -14.05289 -12.2698 -28.6875 -19.78125 10.05899 2.61375 17.2611 5.62932 22.875 9 C 124.63297 63.338161 121.03766 52.354109 105.8125 16.625 z'
+				);
+
+				type Glyph = {
+					x: number; y: number; vy: number; text: string;
+					size: number; alpha: number; arch: boolean;
+				};
+				let glyphs: Glyph[] = [];
+				let dpr = 1;
+
+				const spawn = (): Glyph => ({
+					x: Math.random() * innerWidth,
+					y: Math.random() * innerHeight,
+					vy: 0.18 + Math.random() * 0.45,
+					text: TOKENS[(Math.random() * TOKENS.length) | 0],
+					size: 10 + Math.random() * 7,
+					alpha: 0.18 + Math.random() * 0.5,
+					arch: Math.random() < 0.1,
+				});
+
+				const resize = () => {
+					dpr = Math.min(devicePixelRatio || 1, 2);
+					canvas.width = innerWidth * dpr;
+					canvas.height = innerHeight * dpr;
+					ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+					const target = innerWidth < 640 ? 16 : innerWidth < 1280 ? 26 : 38;
+					glyphs = Array.from({ length: target }, spawn);
+				};
+				resize();
+				let resizeTimer: number | undefined;
+				addEventListener('resize', () => {
+					clearTimeout(resizeTimer);
+					resizeTimer = window.setTimeout(resize, 200);
+				});
+
+				const drawArch = (g: Glyph) => {
+					const s = (g.size * 2.4) / 182;
+					ctx.save();
+					ctx.globalAlpha = g.alpha * 0.8;
+					ctx.fillStyle = ARCH;
+					ctx.translate(g.x, g.y);
+					ctx.scale(s, s);
+					ctx.fill(ARCH_PATH);
+					ctx.restore();
+				};
+
+				let last = 0;
+				let running = true;
+				const frame = (t: number) => {
+					if (!running) return;
+					if (t - last > 1000 / 30) {
+						last = t;
+						ctx.clearRect(0, 0, innerWidth, innerHeight);
+						for (const g of glyphs) {
+							g.y -= g.vy;
+							if (g.y < -30) {
+								g.y = innerHeight + 20;
+								g.x = Math.random() * innerWidth;
+								g.text = TOKENS[(Math.random() * TOKENS.length) | 0];
+							}
+							if (g.arch) {
+								drawArch(g);
+							} else {
+								ctx.globalAlpha = g.alpha;
+								ctx.fillStyle = ARCH;
+								ctx.font = `${g.size}px "JetBrains Mono", monospace`;
+								ctx.fillText(g.text, g.x, g.y);
+							}
+						}
+						ctx.globalAlpha = 1;
+					}
+					requestAnimationFrame(frame);
+				};
+				requestAnimationFrame(frame);
+
+				document.addEventListener('visibilitychange', () => {
+					running = !document.hidden;
+					if (running) requestAnimationFrame(frame);
+				});
+			}
 		</script>
+
+		<style is:global>
+			#nav nav a[data-active] {
+				color: var(--color-arch-2);
+			}
+			#nav nav a[data-active]::before {
+				content: '›';
+				margin-right: 0.3rem;
+				color: var(--color-lime);
+			}
+			#nav.is-stuck {
+				border-bottom-color: var(--color-line-2);
+				background: color-mix(in oklab, var(--color-ink) 88%, transparent);
+				box-shadow: 0 12px 30px -22px rgba(0, 0, 0, 0.9);
+			}
+		</style>
 	</body>
 </html>
-
-<style is:global>
-	:root {
-		--font-sans: 'Inter', system-ui, sans-serif;
-		--font-mono: 'JetBrains Mono', monospace;
-	}
-	
-	html {
-		scroll-behavior: smooth;
-	}
-
-	body {
-		font-family: var(--font-sans);
-	}
-
-	code {
-		font-family: var(--font-mono);
-	}
-</style>

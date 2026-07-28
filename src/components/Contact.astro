@@ -1,0 +1,134 @@
+---
+import SectionHeading from './SectionHeading.astro';
+
+interface Props {
+	qrDataUrl: string;
+}
+
+const { qrDataUrl } = Astro.props;
+
+const channels = [
+	{
+		key: 'email',
+		value: 'italogules@gmail.com',
+		href: 'mailto:italogules@gmail.com',
+		icon: 'M3 8l7.9 5.3a2 2 0 0 0 2.2 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z',
+	},
+	{
+		key: 'linkedin',
+		value: 'in/italogules',
+		href: 'https://www.linkedin.com/in/italogules/',
+		icon: 'M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-13h4v1.5A6 6 0 0 1 16 8zM2 9h4v12H2zM4 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z',
+	},
+	{
+		key: 'location',
+		value: 'Gold Coast, QLD · AEST',
+		icon: 'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0zM12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
+	},
+	{
+		key: 'card',
+		value: '/card — vCard + QR',
+		href: '/card',
+		icon: 'M3 5h18v14H3zM7 9h4M7 13h8',
+	},
+];
+---
+
+<section id="contact" class="relative px-5 py-20 md:px-8 md:py-24">
+	<div class="mx-auto max-w-6xl">
+		<SectionHeading index="04" title="contact" command="./say-hello --now" accent="lime" />
+
+		<h2 class="display mb-12 text-[clamp(2.5rem,8vw,5.5rem)] text-white md:mb-16">
+			<span class="reveal block" style="--i:1">Let's automate</span>
+			<span class="reveal block hollow" style="--i:2">something</span>
+		</h2>
+
+		<div class="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
+			<div>
+				<p class="reveal mb-8 max-w-lg font-sans text-base leading-relaxed text-dim" style="--i:3">
+					I'm hunting for interesting problems in Australia — the messy integrations, the
+					processes nobody wants to own, the AI project that stalled at "cool demo". Send the
+					ugly one.
+				</p>
+
+				<dl class="reveal mb-8 border border-line" style="--i:4">
+					{
+						channels.map((c, i) => {
+							const Row = c.href ? 'a' : 'div';
+							return (
+								<Row
+									href={c.href}
+									target={c.href?.startsWith('http') ? '_blank' : undefined}
+									rel={c.href?.startsWith('http') ? 'noopener' : undefined}
+									class={`group flex items-center gap-4 px-4 py-3.5 transition-colors duration-300 ${
+										i > 0 ? 'border-t border-line' : ''
+									} ${c.href ? 'hover:bg-surface' : ''}`}
+								>
+									<svg
+										class="h-4 w-4 shrink-0 text-line-2 transition-colors duration-300 group-hover:text-arch"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="1.75"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<path d={c.icon} />
+									</svg>
+									<dt class="w-20 shrink-0 text-[0.625rem] uppercase tracking-[0.18em] text-dim">
+										{c.key}
+									</dt>
+									<dd class="min-w-0 truncate text-xs text-fg transition-colors duration-300 group-hover:text-arch-2 sm:text-sm">
+										{c.value}
+									</dd>
+									{c.href && (
+										<span class="ml-auto shrink-0 text-line-2 transition-all duration-300 group-hover:translate-x-1 group-hover:text-arch">
+											→
+										</span>
+									)}
+								</Row>
+							);
+						})
+					}
+				</dl>
+
+				<div class="reveal flex flex-wrap gap-3" style="--i:5">
+					<a href="mailto:italogules@gmail.com" class="btn btn-primary">
+						<span>mail --compose</span>
+						<span aria-hidden="true">↗</span>
+					</a>
+					<a href="/italo.vcf" class="btn">
+						<span>wget vcard</span>
+						<span aria-hidden="true">↓</span>
+					</a>
+				</div>
+			</div>
+
+			<!-- QR terminal -->
+			<div class="reveal" style="--i:4">
+				<a href="/card" class="term group block">
+					<div class="term-bar">
+						<span class="term-dots"><i></i><i></i><i></i></span>
+						<span class="ml-1">qrencode -o card.png</span>
+					</div>
+					<div class="flex flex-col items-center gap-4 p-6">
+						<div class="border border-line bg-ink p-2 transition-colors duration-300 group-hover:border-arch/50">
+							<img
+								src={qrDataUrl}
+								alt="QR code linking to Italo's contact card"
+								width="140"
+								height="140"
+								class="h-32 w-32 transition-transform duration-500 group-hover:scale-[1.04]"
+							/>
+						</div>
+						<span
+							class="text-[0.625rem] uppercase tracking-[0.2em] text-dim transition-colors duration-300 group-hover:text-arch-2"
+						>
+							scan or tap · contact card
+						</span>
+					</div>
+				</a>
+			</div>
+		</div>
+	</div>
+</section>

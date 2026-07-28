@@ -1,36 +1,248 @@
 ---
+const bootLines = [
+	{ tag: 'ok', text: 'mounting /dev/experience', result: '13 years' },
+	{ tag: 'ok', text: 'loading agents [hermes, claude]', result: 'ready' },
+	{ tag: 'ok', text: 'systemctl start automation.service', result: 'active' },
+	{ tag: 'ok', text: 'bridging legacy ↔ ai', result: 'linked' },
+	{ tag: 'kill', text: 'boring.repetitive.tasks', result: 'terminated' },
+];
+
+const stats = [
+	{ value: 13, suffix: 'y', label: 'career in IT' },
+	{ value: 10, suffix: 'y', label: 'at the MPF' },
+	{ value: 3, suffix: '', label: 'degrees' },
+	{ value: '2026', suffix: '', label: 'MIT · AU', static: true },
+];
+
+const titles = [
+	'AI Automation Specialist',
+	'Serial Fixer',
+	'Automation Maniac',
+	'Legacy → AI Translator',
+];
 ---
-<section class="relative pt-32 pb-16 md:pt-48 md:pb-24 overflow-hidden">
-	<div class="container mx-auto px-6">
-		<div class="max-w-4xl">
-			<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1793d1]/10 border border-[#1793d1]/20 text-[#1793d1] text-xs font-medium mb-6">
-				<span class="relative flex h-2 w-2">
-					<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1793d1] opacity-75"></span>
-					<span class="relative inline-flex rounded-full h-2 w-2 bg-[#1793d1]"></span>
+
+<section id="top" class="relative flex min-h-svh items-center px-5 pt-28 pb-20 md:px-8 md:pt-32">
+	<div class="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-16">
+		<!-- ── left: identity ─────────────────────────────────── -->
+		<div>
+			<div class="reveal mb-7 flex flex-wrap items-center gap-3" style="--i:0">
+				<span class="chip">
+					<span class="dot-live"></span>
+					Available · Gold Coast, QLD
 				</span>
-				Available for roles in Australia
+				<span class="chip">MIT @ Kaplan · 2026</span>
 			</div>
-			
-			<h1 class="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6">
-				Italo Gules <br />
-				<span class="text-transparent bg-clip-text bg-gradient-to-r from-[#1793d1] to-[#56b6e8]">
-					AI Automation Specialist
+
+			<h1 class="display mb-6 text-[clamp(3.25rem,11vw,7.5rem)] text-white">
+				<span class="reveal block" style="--i:1">
+					<span class="glitch" data-glitch data-text="ITALO">ITALO</span>
+				</span>
+				<span class="reveal block" style="--i:2">
+					<span class="glitch hollow" data-glitch data-text="GULES">GULES</span>
 				</span>
 			</h1>
-			
-			<p class="text-lg md:text-xl text-zinc-400 max-w-2xl mb-10 leading-relaxed">
-				I automate the boring, so you can focus on the fun. 
-				Over 11 years of IT experience bridging the gap between legacy infrastructure and modern AI integration.
+
+			<div class="reveal mb-8 flex items-baseline gap-2 text-sm md:text-base" style="--i:3">
+				<span class="text-lime">&gt;</span>
+				<span
+					id="role"
+					class="caret min-h-[1.5em] font-medium text-arch-2"
+					data-titles={JSON.stringify(titles)}>{titles[0]}</span
+				>
+			</div>
+
+			<p class="reveal mb-10 max-w-xl font-sans text-base leading-relaxed text-dim md:text-lg" style="--i:4">
+				I automate the boring so you can get on with the fun. Thirteen years across software
+				development, systems administration and technical leadership — now wiring
+				<span class="text-fg">local LLMs, agents and pipelines</span> into systems that were never
+				designed for them.
 			</p>
-			
-			<div class="flex flex-wrap gap-4">
-				<a href="#contact" class="px-8 py-3 rounded-lg bg-[#1793d1] hover:bg-[#56b6e8] text-white font-medium transition-colors">
-					Let's automate something
+
+			<div class="reveal flex flex-wrap gap-3" style="--i:5">
+				<a href="#contact" class="btn btn-primary">
+					<span>./automate --boring</span>
+					<span aria-hidden="true">↘</span>
 				</a>
-				<a href="https://www.linkedin.com/in/italogules/" target="_blank" class="px-8 py-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-medium transition-all">
-					View LinkedIn
+				<a
+					href="https://www.linkedin.com/in/italogules/"
+					target="_blank"
+					rel="noopener"
+					class="btn"
+				>
+					<span>cat linkedin</span>
+					<span aria-hidden="true">↗</span>
 				</a>
 			</div>
+
+			<!-- ── stats ──────────────────────────────────────── -->
+			<dl
+				class="reveal mt-12 grid grid-cols-2 gap-px border border-line bg-line sm:grid-cols-4"
+				style="--i:6"
+			>
+				{
+					stats.map((s) => (
+						<div class="sheen group bg-ink px-4 py-4 transition-colors duration-300 hover:bg-surface">
+							<dt class="text-[0.625rem] uppercase tracking-[0.18em] text-dim">{s.label}</dt>
+							{s.static ? (
+								<dd class="tnum mt-1 text-2xl font-bold text-white transition-colors duration-300 group-hover:text-arch-2">
+									{s.value}
+								</dd>
+							) : (
+								<dd
+									class="tnum mt-1 text-2xl font-bold text-white transition-colors duration-300 group-hover:text-arch-2"
+									data-count={s.value}
+									data-suffix={s.suffix}
+								>
+									0{s.suffix}
+								</dd>
+							)}
+						</div>
+					))
+				}
+			</dl>
+		</div>
+
+		<!-- ── right: boot log ────────────────────────────────── -->
+		<div class="reveal lg:pl-4" style="--i:3">
+			<div class="term">
+				<div class="term-bar">
+					<span class="term-dots"><i></i><i></i><i></i></span>
+					<span class="ml-1 truncate">italo@arch — boot.log</span>
+					<span class="ml-auto hidden text-[0.625rem] sm:inline">tty1</span>
+				</div>
+				<div class="space-y-1.5 p-4 text-[0.6875rem] leading-relaxed sm:text-xs" id="boot">
+					{
+						bootLines.map((l) => (
+							<div class="boot-line flex items-baseline gap-2 opacity-0">
+								<span class={l.tag === 'ok' ? 'text-lime' : 'text-magenta'}>
+									[{l.tag === 'ok' ? ' ok ' : 'kill'}]
+								</span>
+								<span class="text-dim">{l.text}</span>
+								<span class="mx-1 hidden flex-1 self-center border-b border-dashed border-line-2 sm:block"></span>
+								<span class={l.tag === 'ok' ? 'text-fg' : 'text-magenta'}>{l.result}</span>
+							</div>
+						))
+					}
+					<div class="flex items-baseline gap-2 pt-2">
+						<span class="text-arch">$</span>
+						<span class="caret caret-lime text-fg" id="boot-cursor"></span>
+					</div>
+				</div>
+			</div>
+
+			<p class="mt-4 pl-1 font-sans text-xs italic leading-relaxed text-dim">
+				“Everything boring and repetitive should be automated. Everything fun and repetitive
+				should not.”
+			</p>
 		</div>
 	</div>
+
+	<!-- scroll hint -->
+	<a
+		href="#about"
+		class="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-[0.625rem] uppercase tracking-[0.25em] text-dim transition-colors hover:text-arch-2 md:flex"
+		aria-label="Scroll to philosophy"
+	>
+		<span>scroll</span>
+		<span class="hint text-arch" aria-hidden="true">↓</span>
+	</a>
 </section>
+
+<script>
+	const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	/* ── boot log: reveal lines one at a time ─────────────── */
+	const lines = Array.from(document.querySelectorAll<HTMLElement>('.boot-line'));
+	if (reduced) {
+		lines.forEach((l) => (l.style.opacity = '1'));
+	} else {
+		lines.forEach((line, i) => {
+			setTimeout(() => {
+				line.style.opacity = '1';
+				line.animate(
+					[
+						{ opacity: 0, transform: 'translateX(-8px)', filter: 'blur(3px)' },
+						{ opacity: 1, transform: 'none', filter: 'none' },
+					],
+					{ duration: 320, easing: 'cubic-bezier(.22,1,.36,1)' }
+				);
+			}, 500 + i * 260);
+		});
+	}
+
+	/* ── rotating job titles: type / erase ───────────────── */
+	const role = document.getElementById('role');
+	if (role) {
+		const titles: string[] = JSON.parse(role.dataset.titles || '[]');
+		if (!reduced && titles.length > 1) {
+			let ti = 0;
+			let ci = titles[0].length;
+			let erasing = false;
+			const step = () => {
+				const current = titles[ti];
+				if (erasing) {
+					ci--;
+					if (ci <= 0) {
+						erasing = false;
+						ti = (ti + 1) % titles.length;
+						setTimeout(step, 260);
+					} else {
+						role.textContent = current.slice(0, ci);
+						setTimeout(step, 26);
+					}
+				} else {
+					ci++;
+					role.textContent = titles[ti].slice(0, ci);
+					if (ci >= titles[ti].length) {
+						erasing = true;
+						setTimeout(step, 2600);
+					} else {
+						setTimeout(step, 55);
+					}
+				}
+			};
+			setTimeout(step, 3000);
+		}
+	}
+
+	/* ── occasional autonomous glitch on the name ─────────── */
+	if (!reduced) {
+		const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-glitch]'));
+		setInterval(() => {
+			const el = targets[(Math.random() * targets.length) | 0];
+			if (!el) return;
+			el.classList.add('is-glitching');
+			setTimeout(() => el.classList.remove('is-glitching'), 380);
+		}, 5200);
+	}
+
+	/* ── count-up stats ──────────────────────────────────── */
+	const counters = document.querySelectorAll<HTMLElement>('[data-count]');
+	const countIO = new IntersectionObserver(
+		(entries) => {
+			for (const e of entries) {
+				if (!e.isIntersecting) continue;
+				const el = e.target as HTMLElement;
+				countIO.unobserve(el);
+				const target = Number(el.dataset.count || 0);
+				const suffix = el.dataset.suffix || '';
+				if (reduced) {
+					el.textContent = `${target}${suffix}`;
+					continue;
+				}
+				const duration = 1100;
+				const start = performance.now();
+				const tick = (now: number) => {
+					const p = Math.min((now - start) / duration, 1);
+					const eased = 1 - Math.pow(1 - p, 3);
+					el.textContent = `${Math.round(target * eased)}${suffix}`;
+					if (p < 1) requestAnimationFrame(tick);
+				};
+				requestAnimationFrame(tick);
+			}
+		},
+		{ threshold: 0.5 }
+	);
+	counters.forEach((c) => countIO.observe(c));
+</script>
