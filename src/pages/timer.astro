@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07080a">
+<title>BJJ Timer</title>
+<link rel="icon" href="/favicon.svg">
+<style is:inline>
+  /* ------------------------------------------------------------------
+     BJJ round timer — built for a TV + remote control.
+     Self-contained on purpose: no fonts, no scripts, no network.
+     ------------------------------------------------------------------ */
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #07080a;
+    --surface: #0e1116;
+    --line: #1a1f26;
+    --line-2: #29313b;
+    --dim: #69737e;
+    --fg: #ccd3db;
+    --lime: #c8f135;
+    --amber: #f3a935;
+    --arch: #1793d1;
+
+    /* driven by [data-phase] below */
+    --phase: var(--dim);
+    --glow: rgba(105, 115, 126, .16);
+
+    /* TV overscan safety */
+    --pad-x: 4vw;
+    --pad-y: 3.5vh;
+  }
+
+  html {
+    background: var(--ink);
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+    height: 100%;
+  }
+
+  body {
+    height: 100%;
+    color: var(--fg);
+    font-family: ui-monospace, "JetBrains Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .02em;
+    overflow: hidden;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    /* soft wash of the phase colour — readable from across the mat */
+    background:
+      radial-gradient(120vw 90vh at 50% 42%, var(--glow), transparent 70%),
+      var(--ink);
+    transition: background-color .35s linear;
+  }
+
+  body[data-phase="work"]  { --phase: var(--lime);  --glow: rgba(200, 241, 53, .13); }
+  body[data-phase="rest"]  { --phase: var(--amber); --glow: rgba(243, 169, 53, .13); }
+  body[data-phase="prep"]  { --phase: var(--arch);  --glow: rgba(23, 147, 209, .15); }
+  body[data-phase="done"]  { --phase: var(--arch);  --glow: rgba(23, 147, 209, .10); }
+
+  /* ---------------- progress bar ---------------- */
+
+  .track {
+    flex: 0 0 auto;
+    height: 1.1vh;
+    min-height: 6px;
+    background: var(--line);
+  }
+  .fill {
+    height: 100%;
+    width: 0%;
+    background: var(--phase);
+    box-shadow: 0 0 24px var(--phase);
+    transition: background-color .35s linear;
+  }
+
+  /* ---------------- main readout ---------------- */
+
+  main {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1vh;
+    padding: var(--pad-y) var(--pad-x);
+    min-height: 0;
+  }
+
+  .phase {
+    font-size: min(9vw, 11vh);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: .16em;
+    color: var(--phase);
+    text-transform: uppercase;
+  }
+
+  .clock {
+    font-size: min(30vw, 47vh);
+    font-weight: 700;
+    line-height: .92;
+    letter-spacing: -.02em;
+    color: #fff;
+    text-shadow: 0 0 min(6vw, 8vh) var(--glow);
+  }
+  /* paused: pulse the digits so it is obvious from the back of the room */
+  body.paused .clock { animation: blink 1.4s steps(1, end) infinite; }
+  @keyframes blink { 50% { opacity: .28; } }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0 1.5em;
+    font-size: min(2.9vw, 3.6vh);
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+  }
+  .meta span:empty { display: none; }
+  /* divider between whichever items are actually showing */
+  .meta span + span:not(:empty)::before {
+    content: "";
+    display: inline-block;
+    width: 1px;
+    height: .95em;
+    margin-right: 1.5em;
+    vertical-align: -.1em;
+    background: var(--line-2);
+  }
+  #round { color: var(--fg); }
+
+  /* ---------------- hint / button bar ---------------- */
+
+  .hints {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: .8vw;
+    padding: 0 var(--pad-x) var(--pad-y);
+    font-size: min(1.6vw, 2.1vh);
+  }
+  .hints button {
+    display: flex;
+    align-items: center;
+    gap: .7em;
+    padding: .8em 1.1em;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--dim);
+    font: inherit;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .hints button kbd {
+    font: inherit;
+    color: var(--phase);
+    font-weight: 700;
+  }
+  .hints button:hover,
+  .hints button:focus-visible { border-color: var(--phase); color: var(--fg); outline: none; }
+
+  /* nothing to go back to / skip / reset before the first round starts */
+  body[data-phase="idle"] .hints button[data-act="prev"],
+  body[data-phase="idle"] .hints button[data-act="next"],
+  body[data-phase="idle"] .hints button[data-act="reset"] { opacity: .3; }
+
+  /* ---------------- settings overlay ---------------- */
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    /* fixed accent: the phase colour is dim while idle, which would make
+       the selected row invisible */
+    --phase: var(--lime);
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.2vh;
+    padding: var(--pad-y) var(--pad-x);
+  }
+  .overlay[hidden] { display: none; }
+
+  .overlay h1 {
+    font-size: min(3.4vw, 4.4vh);
+    font-weight: 700;
+    letter-spacing: .22em;
+    color: var(--phase);
+    text-transform: uppercase;
+  }
+
+  .rows {
+    width: min(80vw, 1100px);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--line);
+  }
+
+  .row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1em;
+    padding: 1.6vh 1.4vw;
+    border-bottom: 1px solid var(--line);
+    font-size: min(2.6vw, 3.4vh);
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    cursor: pointer;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row .val {
+    color: var(--fg);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;   /* keep "1:30", "10s", "Endless" as written */
+    white-space: nowrap;
+  }
+
+  .row.sel {
+    background: var(--surface);
+    color: var(--fg);
+    box-shadow: inset .35vw 0 0 var(--phase);
+  }
+  .row.sel .val { color: var(--phase); }
+  /* arrows only on the selected adjustable row */
+  .row.sel[data-kind="num"] .val::before { content: "‹ "; color: var(--dim); }
+  .row.sel[data-kind="num"] .val::after  { content: " ›"; color: var(--dim); }
+  .row.typing .val { color: #fff; border-bottom: 2px solid var(--phase); }
+
+  .overlay .foot {
+    font-size: min(1.7vw, 2.2vh);
+    color: var(--dim);
+    text-align: center;
+    line-height: 1.9;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .overlay .foot kbd { font: inherit; color: var(--fg); font-weight: 700; }
+</style>
+</head>
+
+<body data-phase="idle">
+  <div class="track"><div class="fill" id="bar"></div></div>
+
+  <main>
+    <div class="phase" id="phase">Ready</div>
+    <div class="clock" id="clock">05:00</div>
+    <div class="meta">
+      <span id="round"></span>
+      <span id="next"></span>
+      <span id="total"></span>
+    </div>
+  </main>
+
+  <nav class="hints">
+    <button data-act="toggle"><kbd>OK</kbd><b id="okLabel">Start</b></button>
+    <button data-act="prev"><kbd>&#9664;</kbd><b>Back</b></button>
+    <button data-act="next"><kbd>&#9654;</kbd><b>Skip</b></button>
+    <button data-act="reset"><kbd>&#9650;</kbd><b>Reset</b></button>
+    <button data-act="settings"><kbd>&#9660;</kbd><b>Edit times</b></button>
+  </nav>
+
+  <div class="overlay" id="overlay" hidden>
+    <h1>Edit timer</h1>
+    <div class="rows" id="rows"></div>
+    <div class="foot">
+      <kbd>&#9650; &#9660;</kbd> choose &nbsp;·&nbsp; <kbd>&#9664; &#9654;</kbd> change
+      &nbsp;·&nbsp; <kbd>0-9</kbd> type a time (e.g. 500 = 5:00)<br>
+      <kbd>OK</kbd> save &amp; close &nbsp;·&nbsp; <kbd>Back</kbd> close
+    </div>
+  </div>
+
+<script is:inline>
+"use strict";
+
+/* ==================================================================
+   Config
+   ================================================================== */
+
+var STORE = "bjj-timer.v1";
+
+var DEFAULTS = {
+  work:  5 * 60,   // seconds of rolling
+  rest:  90,       // seconds of rest
+  rounds: 0,       // 0 = keep going forever
+  prep:  10,       // countdown before the first round
+  warn:  5,        // beep on each of the last N seconds
+  sound: 1
+};
+
+var cfg = load();
+
+function load() {
+  var c = {}, k;
+  for (k in DEFAULTS) c[k] = DEFAULTS[k];
+  try {
+    var raw = JSON.parse(localStorage.getItem(STORE) || "{}");
+    for (k in DEFAULTS) if (typeof raw[k] === "number") c[k] = raw[k];
+  } catch (e) { /* private mode / no storage — defaults are fine */ }
+  return c;
+}
+
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify(cfg)); } catch (e) {}
+}
+
+/* ==================================================================
+   Timer state
+   ==================================================================
+   Countdown is deadline-based (performance.now), so a slow TV browser
+   or a throttled tab can never make the round drift. */
+
+var st = {
+  running: false,
+  phase: "idle",   // idle | prep | work | rest | done
+  round: 1,
+  remain: cfg.work * 1000,
+  deadline: 0,
+  total: 0,        // elapsed wall time since start
+  lastTick: 0,
+  beeped: -1       // last whole second we beeped a warning on
+};
+
+function dur(phase) {
+  if (phase === "work") return cfg.work;
+  if (phase === "rest") return cfg.rest;
+  if (phase === "prep") return cfg.prep;
+  return 0;
+}
+
+function isLastRound() { return cfg.rounds > 0 && st.round >= cfg.rounds; }
+
+function enter(phase, round, quiet) {
+  st.phase = phase;
+  if (round) st.round = round;
+  st.remain = dur(phase) * 1000;
+  st.deadline = now() + st.remain;
+  st.beeped = -1;
+  if (phase === "done") { st.running = false; st.remain = 0; }
+  if (!quiet) cue(phase);
+  render();
+}
+
+/* forward / backward through prep → work → rest → work → … */
+function advance(quiet) {
+  if (st.phase === "idle") return;
+  if (st.phase === "prep") return enter("work", 1, quiet);
+  if (st.phase === "work") return isLastRound() ? enter("done", 0, quiet) : enter("rest", 0, quiet);
+  if (st.phase === "rest") return enter("work", st.round + 1, quiet);
+  reset();
+}
+
+function back() {
+  if (st.phase === "idle") return;
+  // more than a second into the phase? restart it instead of stepping back
+  if (st.phase !== "done" && st.remain < dur(st.phase) * 1000 - 1000) {
+    return enter(st.phase);
+  }
+  if (st.phase === "done") return enter("work", cfg.rounds > 0 ? cfg.rounds : st.round);
+  if (st.phase === "rest") return enter("work", st.round);
+  if (st.phase === "work" && st.round > 1) return enter("rest", st.round - 1);
+  if (st.phase === "work") return cfg.prep > 0 ? enter("prep") : enter("work", 1);
+  return enter(st.phase);
+}
+
+function start() {
+  unlockAudio();
+  if (st.phase === "idle" || st.phase === "done") {
+    st.round = 1;
+    st.total = 0;
+    st.running = true;
+    st.lastTick = now();
+    enter(cfg.prep > 0 ? "prep" : "work", 1);
+  } else {
+    st.running = true;
+    st.lastTick = now();
+    st.deadline = now() + st.remain;
+  }
+  keepAwake();
+  render();
+}
+
+function pause() {
+  if (!st.running) return;
+  st.remain = Math.max(0, st.deadline - now());
+  st.running = false;
+  render();
+}
+
+function toggle() { st.running ? pause() : start(); }
+
+function reset() {
+  st.running = false;
+  st.phase = "idle";
+  st.round = 1;
+  st.remain = cfg.work * 1000;
+  st.total = 0;
+  st.beeped = -1;
+  render();
+}
+
+function now() { return performance.now(); }
+
+/* ==================================================================
+   Loop
+   ==================================================================
+   Driven by setInterval, NOT requestAnimationFrame: rAF is paused
+   whenever the page is not being composited (backgrounded tab, TV
+   overlay on top, panel asleep), which would freeze the clock. The
+   display only changes once a second, so 100ms is plenty. */
+
+function tick() {
+  if (!st.running) return;
+
+  var t = now();
+  st.total += t - st.lastTick;
+  st.lastTick = t;
+  st.remain = st.deadline - t;
+
+  var secs = Math.ceil(st.remain / 1000);
+  if (cfg.warn > 0 && secs > 0 && secs <= cfg.warn && secs !== st.beeped) {
+    st.beeped = secs;
+    beep(880, .07, .25);
+  }
+
+  /* Cross as many boundaries as the elapsed time demands, carrying the
+     overshoot forward. A throttled interval can hand us a big jump, so
+     catch up silently and only sound the phase we actually land in. */
+  var jumped = 0;
+  while (st.running && st.remain <= 0 && jumped < 500) {
+    var over = -st.remain;
+    advance(true);
+    jumped++;
+    if (st.running) { st.deadline -= over; st.remain -= over; }
+  }
+  if (jumped) cue(st.phase);
+
+  render();
+}
+
+setInterval(tick, 100);
+
+/* ==================================================================
+   Rendering
+   ================================================================== */
+
+var $ = function (id) { return document.getElementById(id); };
+var el = {
+  body: document.body, bar: $("bar"), phase: $("phase"), clock: $("clock"),
+  round: $("round"), next: $("next"), total: $("total"), ok: $("okLabel")
+};
+
+var LABEL = { idle: "Ready", prep: "Get ready", work: "Roll", rest: "Rest", done: "Finished" };
+var shown = "";
+
+function mmss(sec) {
+  sec = Math.max(0, Math.ceil(sec));
+  var m = Math.floor(sec / 60), s = sec % 60;
+  return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+}
+
+function clean(sec) { // 1:30 / 45s — for the small labels
+  sec = Math.max(0, Math.round(sec));
+  var m = Math.floor(sec / 60), s = sec % 60;
+  return m ? m + ":" + (s < 10 ? "0" : "") + s : s + "s";
+}
+
+function render() {
+  var secs = st.phase === "idle" ? cfg.work
+           : st.phase === "done" ? 0
+           : st.remain / 1000;
+
+  var text = mmss(secs);
+  if (text !== shown) { el.clock.textContent = text; shown = text; }
+
+  el.body.dataset.phase = st.phase;
+  el.body.classList.toggle("paused", !st.running && st.phase !== "idle" && st.phase !== "done");
+  el.phase.textContent = LABEL[st.phase];
+  el.ok.textContent = st.running ? "Pause" : (st.phase === "idle" || st.phase === "done") ? "Start" : "Resume";
+
+  var full = dur(st.phase) * 1000;
+  el.bar.style.width = (full > 0 ? Math.max(0, Math.min(100, (1 - st.remain / full) * 100)) : 0) + "%";
+
+  el.round.textContent = (st.phase === "idle" || st.phase === "done")
+    ? "Work " + clean(cfg.work) + " · Rest " + clean(cfg.rest)
+    : "Round " + st.round + (cfg.rounds > 0 ? " / " + cfg.rounds : "");
+
+  el.next.textContent = st.phase === "work" ? (isLastRound() ? "Last round" : "Then rest " + clean(cfg.rest))
+                      : st.phase === "rest" ? "Then roll " + clean(cfg.work)
+                      : st.phase === "idle" ? (cfg.rounds > 0 ? cfg.rounds + " rounds" : "Endless")
+                      : "";
+
+  el.total.textContent = st.total > 999 ? "Total " + mmss(st.total / 1000) : "";
+}
+
+/* ==================================================================
+   Sound — WebAudio only, no files to load
+   ================================================================== */
+
+var ac = null;
+
+function unlockAudio() {
+  try {
+    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === "suspended") ac.resume();
+  } catch (e) { ac = null; }
+}
+
+function beep(freq, len, vol, delay) {
+  if (!cfg.sound || !ac) return;
+  try {
+    var t0 = ac.currentTime + (delay || 0);
+    var osc = ac.createOscillator(), g = ac.createGain();
+    osc.type = "square";
+    osc.frequency.value = freq;
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + .012);
+    g.gain.setValueAtTime(vol, t0 + len);
+    g.gain.exponentialRampToValueAtTime(.0001, t0 + len + .09);
+    osc.connect(g); g.connect(ac.destination);
+    osc.start(t0); osc.stop(t0 + len + .1);
+  } catch (e) {}
+}
+
+/* a distinct signature per phase, so nobody has to look at the screen */
+function cue(phase) {
+  if (phase === "work") { beep(660, .12, .32); beep(990, .12, .32, .16); beep(1320, .3, .34, .32); }
+  else if (phase === "rest") { beep(330, .55, .3); }
+  else if (phase === "done") { for (var i = 0; i < 4; i++) beep(i % 2 ? 660 : 990, .14, .32, i * .22); }
+}
+
+/* ==================================================================
+   Keep the TV from sleeping / screensaving mid-round
+   ================================================================== */
+
+var lock = null;
+function keepAwake() {
+  if (lock || !navigator.wakeLock) return;
+  navigator.wakeLock.request("screen").then(function (l) {
+    lock = l;
+    l.addEventListener("release", function () { lock = null; });
+  }, function () {});
+}
+document.addEventListener("visibilitychange", function () {
+  if (document.hidden) return;
+  if (st.running) { keepAwake(); tick(); }   // resync immediately on return
+});
+
+/* ==================================================================
+   Settings screen
+   ================================================================== */
+
+var ROWS = [
+  { key: "work",   name: "Rolling time", kind: "num", step: 5, min: 5,  max: 3600, time: true },
+  { key: "rest",   name: "Rest time",    kind: "num", step: 5, min: 5,  max: 3600, time: true },
+  { key: "rounds", name: "Rounds",       kind: "num", step: 1, min: 0,  max: 99 },
+  { key: "prep",   name: "Countdown before start", kind: "num", step: 5, min: 0, max: 120, time: true },
+  { key: "warn",   name: "Beep on last seconds",   kind: "num", step: 1, min: 0, max: 15 },
+  { key: "sound",  name: "Sound",        kind: "bool" },
+  { key: null,     name: "Reset to defaults", kind: "act" }
+];
+
+var over = $("overlay"), rowsEl = $("rows");
+var sel = 0, typing = "";
+
+ROWS.forEach(function (r, i) {
+  var d = document.createElement("div");
+  d.className = "row";
+  d.dataset.kind = r.kind;
+  d.innerHTML = '<span class="label"></span><span class="val"></span>';
+  d.querySelector(".label").textContent = r.name;
+  d.addEventListener("click", function () { sel = i; if (r.kind !== "num") act(); paintRows(); });
+  rowsEl.appendChild(d);
+});
+
+function rowValue(r) {
+  if (r.kind === "act") return "Press OK";
+  if (r.kind === "bool") return cfg[r.key] ? "On" : "Off";
+  var v = cfg[r.key];
+  if (r.key === "rounds") return v === 0 ? "Endless" : String(v);
+  if (r.key === "warn") return v === 0 ? "Off" : v + "s";
+  return clean(v);
+}
+
+function paintRows() {
+  for (var i = 0; i < ROWS.length; i++) {
+    var node = rowsEl.children[i], r = ROWS[i];
+    node.classList.toggle("sel", i === sel);
+    node.classList.toggle("typing", i === sel && typing !== "");
+    node.querySelector(".val").textContent =
+      (i === sel && typing !== "") ? (r.time ? clean(parseTyped(typing)) : typing) : rowValue(r);
+  }
+}
+
+/* "500" → 5:00, "45" → 45s — the way every gym clock works */
+function parseTyped(s) {
+  var n = parseInt(s, 10) || 0;
+  if (s.length <= 2) return n;
+  return Math.floor(n / 100) * 60 + (n % 100);
+}
+
+function commitTyped() {
+  if (typing === "") return;
+  var r = ROWS[sel];
+  if (r.kind === "num") setNum(r, r.time ? parseTyped(typing) : parseInt(typing, 10) || 0);
+  typing = "";
+}
+
+function setNum(r, v) {
+  cfg[r.key] = Math.max(r.min, Math.min(r.max, v));
+  save();
+  if (!st.running && (st.phase === "idle" || st.phase === "done")) reset(); else render();
+}
+
+function openSettings() {
+  pause();
+  unlockAudio();
+  typing = "";
+  sel = 0;               // always land on rolling time — predictable from a couch
+  over.hidden = false;
+  paintRows();
+}
+
+function closeSettings() {
+  commitTyped();
+  over.hidden = true;
+  paintRows();
+  render();
+}
+
+function act() {
+  var r = ROWS[sel];
+  if (r.kind === "bool") { cfg[r.key] = cfg[r.key] ? 0 : 1; save(); if (cfg.sound) beep(990, .1, .3); }
+  else if (r.kind === "act") { for (var k in DEFAULTS) cfg[k] = DEFAULTS[k]; save(); reset(); }
+  paintRows();
+}
+
+function nudge(dir) {
+  var r = ROWS[sel];
+  if (r.kind === "num") { commitTyped(); setNum(r, cfg[r.key] + dir * r.step); }
+  else act();
+  paintRows();
+}
+
+function move(dir) {
+  commitTyped();
+  sel = (sel + dir + ROWS.length) % ROWS.length;
+  paintRows();
+}
+
+/* ==================================================================
+   Remote control
+   ==================================================================
+   TV remotes are inconsistent: webOS sends 461 for Back, Tizen 10009,
+   Android TV sends Escape. Match on key and keyCode, and accept the
+   media keys too. */
+
+var KEYS = {
+  up:     ["ArrowUp", "Up"],
+  down:   ["ArrowDown", "Down"],
+  left:   ["ArrowLeft", "Left"],
+  right:  ["ArrowRight", "Right"],
+  ok:     ["Enter", " ", "Spacebar", "Select", "MediaPlayPause", "MediaPlay", "MediaPause"],
+  back:   ["Escape", "Esc", "Backspace", "BrowserBack", "GoBack", "XF86Back"]
+};
+var CODES = { ok: [13, 32, 179, 415, 19], back: [8, 27, 461, 10009, 166] };
+
+function which(e) {
+  for (var k in KEYS) if (KEYS[k].indexOf(e.key) >= 0) return k;
+  for (var c in CODES) if (CODES[c].indexOf(e.keyCode) >= 0) return c;
+  return null;
+}
+
+document.addEventListener("keydown", function (e) {
+  var k = which(e);
+
+  if (!over.hidden) {
+    if (/^[0-9]$/.test(e.key)) {
+      var r = ROWS[sel];
+      if (r.kind === "num") {
+        typing = (typing + e.key).replace(/^0+(?=\d)/, "").slice(0, r.time ? 4 : 2);
+        paintRows();
+      }
+      e.preventDefault();
+      return;
+    }
+    if (!k) return;
+    e.preventDefault();
+    if (k === "up") move(-1);
+    else if (k === "down") move(1);
+    else if (k === "left") nudge(-1);
+    else if (k === "right") nudge(1);
+    else if (k === "ok") { if (ROWS[sel].kind === "num") closeSettings(); else act(); }
+    else if (k === "back") closeSettings();
+    return;
+  }
+
+  if (!k) {
+    if (e.key === "f" || e.key === "F") fullscreen();
+    return;
+  }
+  e.preventDefault();
+  if (k === "ok") toggle();
+  else if (k === "left") back();
+  else if (k === "right") advance();
+  else if (k === "up") reset();
+  else if (k === "down") openSettings();
+  else if (k === "back") st.running ? pause() : reset();
+});
+
+/* the LG Magic Remote is a pointer, and a phone works too */
+document.querySelector(".hints").addEventListener("click", function (e) {
+  var b = e.target.closest("button[data-act]");
+  if (!b) return;
+  unlockAudio();
+  ({ toggle: toggle, prev: back, next: advance, reset: reset, settings: openSettings })[b.dataset.act]();
+});
+
+function fullscreen() {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+}
+
+/* ================================================================== */
+
+over.hidden = true;      // don't rely on the markup attribute alone
+st.lastTick = now();
+reset();
+paintRows();
+</script>
+</body>
+</html>
