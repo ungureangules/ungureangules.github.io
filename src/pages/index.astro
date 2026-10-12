@@ -4,6 +4,7 @@ import Hero from '../components/Hero.astro';
 import About from '../components/About.astro';
 import Skills from '../components/Skills.astro';
 import Experience from '../components/Experience.astro';
+import Projects from '../components/Projects.astro';
 import Contact from '../components/Contact.astro';
 import Ticker from '../components/Ticker.astro';
 import QRCode from 'qrcode';
@@ -43,6 +44,7 @@ const year = new Date().getFullYear();
 		<About />
 		<Skills />
 		<Experience />
+		<Projects />
 		<Contact qrDataUrl={qrDataUrl} />
 
 		<footer class="border-t border-line px-5 py-10 md:px-8">

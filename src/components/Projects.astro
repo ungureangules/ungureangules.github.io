@@ -1,0 +1,129 @@
+---
+import SectionHeading from './SectionHeading.astro';
+
+type Project = {
+	unit: string;
+	title: string;
+	summary: string;
+	status: string;
+	since: string;
+	highlights: string[];
+	stack: string[];
+	repo?: string; // public repo URL; omit while the source is private
+};
+
+const projects: Project[] = [
+	{
+		unit: 'ai-proactive-scheduler.service',
+		title: 'AI Proactive Scheduler',
+		summary:
+			'An AI receptionist for businesses with recurring clients — barbershops, salons, clinics. It learns how often each client comes back, messages them on WhatsApp when they are due, and books the appointment in the conversation.',
+		status: 'in development',
+		since: '2026',
+		highlights: [
+			'Learns each client’s visit rhythm from Google Calendar history, with a confidence score for how regular they are.',
+			'Proactive WhatsApp outreach through Twilio — throttled, opt-out aware and timed to each business’s timezone.',
+			'LLM agent with tool calling that checks real availability and books straight into Google Calendar, and never claims a booking that did not happen.',
+			'Staff dashboard to watch every negotiation live and take over a chat at any moment.',
+		],
+		stack: [
+			'Python',
+			'FastAPI',
+			'PostgreSQL',
+			'Celery',
+			'Redis',
+			'OpenAI',
+			'Twilio WhatsApp',
+			'Google Calendar API',
+			'Next.js',
+			'TypeScript',
+			'Docker',
+		],
+		repo: 'https://github.com/ungureangules/ai-proactive-scheduler',
+	},
+];
+---
+
+<section id="projects" class="relative px-5 py-20 md:px-8 md:py-24">
+	<div class="mx-auto max-w-6xl">
+		<SectionHeading index="04" title="projects" command="systemctl status --user 'side-*'" />
+
+		<div class="space-y-6">
+			{
+				projects.map((p, i) => (
+					<div class="reveal" style={`--i:${i}`}>
+						<article class="term group">
+							<div class="term-bar">
+								<span class="term-dots">
+									<i />
+									<i />
+									<i />
+								</span>
+								<span class="ml-1 truncate">italo@arch — systemctl status {p.unit}</span>
+							</div>
+
+							<div class="p-5 md:p-7">
+								{/* systemctl-style header */}
+								<div class="space-y-1 text-[0.6875rem] leading-relaxed sm:text-xs">
+									<p class="flex flex-wrap items-baseline gap-x-2">
+										<span class="dot-live translate-y-[-1px]" />
+										<span class="text-fg">{p.unit}</span>
+										<span class="text-dim">— {p.title}</span>
+									</p>
+									<p class="pl-4 text-dim">
+										<span class="inline-block w-16">Loaded:</span>
+										<span class="text-fg">loaded</span> (~/projects/{p.unit.replace('.service', '')})
+									</p>
+									<p class="pl-4 text-dim">
+										<span class="inline-block w-16">Active:</span>
+										<span class="text-lime">active ({p.status})</span> since {p.since}
+									</p>
+								</div>
+
+								<div class="my-6 border-t border-dashed border-line-2" />
+
+								<h3 class="text-xl font-bold text-white transition-colors duration-300 group-hover:text-arch-2 md:text-2xl">
+									{p.title}
+								</h3>
+								<p class="mt-3 max-w-3xl font-sans text-sm leading-relaxed text-dim md:text-base">
+									{p.summary}
+								</p>
+
+								<ul class="mt-6 grid gap-3 md:grid-cols-2">
+									{p.highlights.map((line) => (
+										<li class="flex gap-2.5 font-sans text-sm leading-relaxed text-dim">
+											<span class="mt-[0.45rem] h-1 w-1 shrink-0 bg-line-2 transition-colors duration-300 group-hover:bg-arch" />
+											<span>{line}</span>
+										</li>
+									))}
+								</ul>
+
+								<div class="mt-6 flex flex-wrap gap-1.5">
+									{p.stack.map((t) => (
+										<span class="tag">{t}</span>
+									))}
+								</div>
+
+								<div class="mt-7 flex flex-wrap items-center gap-4 border-t border-line pt-5 text-[0.6875rem]">
+									{p.repo ? (
+										<a href={p.repo} target="_blank" rel="noopener" class="btn">
+											<span>git clone</span>
+											<span aria-hidden="true">↗</span>
+										</a>
+									) : (
+										<>
+											<span class="text-dim">
+												<span class="text-magenta">private repo</span> · source available on request
+											</span>
+											<a href="#contact" class="link">ask for a walkthrough →</a>
+										</>
+									)}
+								</div>
+							</div>
+						</article>
+					</div>
+				))
+			}
+		</div>
+	</div>
+</section>
