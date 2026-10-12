@@ -60,7 +60,6 @@ const year = new Date().getFullYear();
 							rel="noopener"
 							class="link">linkedin</a
 						>
-						<a href="/speedometer.html" class="link">speedometer</a>
 						<span class="hidden text-line sm:inline">|</span>
 						<span>astro · tailwind · arch btw</span>
 					</div>
@@ -68,26 +67,5 @@ const year = new Date().getFullYear();
 			</div>
 		</footer>
 
-		<!-- floating speedometer easter egg -->
-		<a
-			href="/speedometer.html"
-			class="group fixed bottom-5 right-5 z-40 flex items-center gap-2.5 border border-line-2 bg-ink/90 px-3.5 py-2.5 text-[0.6875rem] text-dim backdrop-blur-md transition-all duration-300 hover:border-lime/50 hover:text-lime"
-			aria-label="Open the speedometer"
-		>
-			<span class="dot-live"></span>
-			<svg
-				class="h-3.5 w-3.5 text-lime transition-transform duration-500 group-hover:rotate-[18deg]"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<path d="m12 14 4-4" />
-				<path d="M3.34 19a10 10 0 1 1 17.32 0" />
-			</svg>
-			<span class="hidden sm:inline">speedometer</span>
-		</a>
 	</main>
 </Layout>
